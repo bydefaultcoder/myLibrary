@@ -1,0 +1,31 @@
+<!-- booking/templates/booking/index.html -->
+
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h1>Library Seat Booking</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Seat</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for seat in seats %}
+        <tr>
+          <td>{{ seat.location }}</td>
+          <td>{{ seat.status }}</td>
+          <td>
+            {% if seat.status == "Available" %}
+              <a href="{% url 'book_seat' seat.id %}">Book</a>
+            {% elif seat.status == "Booked" %}
+              <span>Booked</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
