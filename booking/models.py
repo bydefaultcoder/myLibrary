@@ -5,10 +5,11 @@ from django.contrib.auth.models import User
 from django.db import transaction
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
-from django.utils import timezone
-from datetime import timedelta, date
-import calendar
+from django.utils import timezone as tz
 
+from customAdmin.models import CustomUser
+# import calendar
+ 
 class Location(models.Model):
     STATUS_CHOICES = [
         ('active', 'Active'),
@@ -20,23 +21,22 @@ class Location(models.Model):
     discription = models.TextField()
     number_of_seats = models.PositiveIntegerField(verbose_name='No of Seats')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL ,null= True,blank=False,editable=False)
+    created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL ,null= True,blank=False,editable=False)
 
     def __str__(self):
-        return str(self.location_id)
+        return f'{self.location_name}-{self.location_id}'
 
     def save(self, *args, **kwargs):
         # Check if this is a new location by verifying if location_id is None
         creating_new = self.location_id is None
         # Create seats only when a new location is created
-        print(self.created_by)
-        super().save(*args, **kwargs)  # Save the location first to ensure it has an ID
+        num_of_seat = self.number_of_seats
         if creating_new:
-            print(self.number_of_seats)
-            for _ in range(self.number_of_seats):
+            self.number_of_seats = 0
+            super().save(*args, **kwargs)  # Save the location first to ensure it has an ID
+            for _ in range(num_of_seat):
                 Seat.objects.create(location=self, status='vacant',created_by=self.created_by)
-
-# class Timing
+        super().save(*args, **kwargs)
 
 @receiver(post_delete, sender=Location)
 def update_location_on_seat_delete(sender, instance, **kwargs):
@@ -52,7 +52,7 @@ class Seat(models.Model):
     location = models.ForeignKey(Location, on_delete=models.CASCADE, verbose_name='Location no.')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='vacant')
     deleted = models.BooleanField(default=False,blank=None,null=False)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True,editable=False)
+    created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True,editable=False)
 
     def save(self, *args, **kwargs):
         # Check if this is a new location by verifying if location_id is None
@@ -62,7 +62,7 @@ class Seat(models.Model):
         # super().save(self, *args, **kwargs)
         super().save(force_insert=force_insert, force_update=force_update, *args, **kwargs)
         if is_new:
-            self.location.number_of_seats +=1
+            self.location.number_of_seats= self.location.number_of_seats + 1
             self.location.save()
 
     def __str__(self):
@@ -86,14 +86,13 @@ class Student(models.Model):
     address = models.TextField()
     adhar_no = models.CharField(max_length=12, unique=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True,editable=False)
+    created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True,editable=False)
 
     def __str__(self):
         return f"{self.name} ({self.status})"
     
     def save(self, *args, **kwargs):
         # Check if the status has changed
-        print("problems comes here")
         if self.pk:
             old_status = Student.objects.get(pk=self.pk).status
             if old_status == 'inrolled':
@@ -111,10 +110,14 @@ class Booking(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     seat = models.ForeignKey(Seat, on_delete=models.CASCADE)
     booking_time = models.DateTimeField(auto_now_add=True)
+
+    start_time = models.DateTimeField(default=tz.now)
+    end_time = models.DurationField(default=tz.now)
+
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active',blank=False,null=False)
-    booking_time = models.DateTimeField(auto_now_add=True)
-    duration = models.DurationField(default=timedelta(days=30))
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True,editable=False)
+    duration = models.DurationField( default=tz.timedelta(days=30))
+    # created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True,editable=False)
+    created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True,editable=False)
 
     def save(self, *args, **kwargs) -> None:
         seat = self.seat
@@ -122,16 +125,14 @@ class Booking(models.Model):
 
         student.status = 'alloted'
         seat.status = 'engaged'
-        print(student)
         try:
             with transaction.atomic():
                 # problem
                 # super().save()
+                print("hello")
                 seat.save()
                 student.save()
                 super().save(*args, **kwargs)
-            print("updated succesfully")
-                # print(seat.seat_id,student.phone_no,"updated succesfully")
         except Exception as e:
             print("Error.." ,e)
     def __str__(self):
@@ -161,3 +162,6 @@ def update_seat_on_delete_booking(sender, instance:Booking, **kwargs):
     # location = instance.location
     # location.number_of_seats -= 1
     # location.save()
+
+
+

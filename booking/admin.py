@@ -1,13 +1,17 @@
 from django.contrib import admin
+from customAdmin.admin import admin_site
+from customAdmin.models import CustomUser
 from .BookingForm import CustomBookingForm
 from .models import Student,Seat,Booking,Location
 from django.db import transaction
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import User
+from django.contrib.auth.models import Group
 
 
-@admin.register(Location)
-class location(admin.ModelAdmin):
+class LocationAdmin(admin.ModelAdmin):
     # list_display
     list_display = ('display_name','number_of_seats','discription',)
     def display_name(self,modelObject):
@@ -15,7 +19,6 @@ class location(admin.ModelAdmin):
     
 
     def save_model(self, request, obj, form, change):
-        print(change,obj)
         if not change:  # If the object is being created
             obj.created_by = request.user
         obj.save()
@@ -27,7 +30,7 @@ class location(admin.ModelAdmin):
         return qs.filter(created_by=request.user)
 
 
-@admin.register(Booking)
+# @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
     list_display = ('Studnt_Name', 'Seat_no', 'booking_time', 'status', 'duration')
     list_filter = ('status',)
@@ -35,6 +38,18 @@ class BookingAdmin(admin.ModelAdmin):
     form = CustomBookingForm
 
     actions = ['custom_bulk_delete']
+
+    def get_form(self, request, obj=None, **kwargs):
+        # Get the form class first
+        form = super().get_form(request, obj, **kwargs)
+
+        # Create a wrapper that passes the request to the form
+        class CustomFormWithRequest(form):
+            def __init__(self, *args, **form_kwargs):
+                form_kwargs['request'] = request
+                super().__init__(*args, **form_kwargs)
+
+        return CustomFormWithRequest
 
     class Media:
         js = ('admin/js/jquery.init.js',  # Make sure jQuery is loaded before your custom script
@@ -51,7 +66,6 @@ class BookingAdmin(admin.ModelAdmin):
         num_deleted = 0
         for booking in queryset:
             try:
-                print(queryset)
                 with transaction.atomic():
                     if booking.status == 'active':
                         selected_pks.append(booking.seat_id)
@@ -78,25 +92,17 @@ class BookingAdmin(admin.ModelAdmin):
         if request.user.is_superuser:
             return qs
         return qs.filter(created_by=request.user)
-    
+
     custom_bulk_delete.short_description = _('Delete selected items (with custom logic)')
     
-    def get_form_kwargs(self, request, obj=None):
-        # Ensure we pass the request to the form
-        kwargs = super().get_form_kwargs(request, obj)
-        kwargs['request'] = request
-        print(kwargs['request'])
-        return kwargs
-    
+
     def save_model(self, request, obj, form, change):
-        print(change,obj)
         if not change:
             obj.created_by = request.user
         obj.save()
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         formfield = super().formfield_for_foreignkey(db_field, request, **kwargs)
-        # print(db_field,"here")
         if db_field.name == 'student':
             formfield.queryset = Student.objects.filter(created_by=request.user)
         if db_field.name == 'seat' :
@@ -107,18 +113,20 @@ class BookingAdmin(admin.ModelAdmin):
 
     # def save_model(self, request, obj, form, change):
     #     # Here, request.user is the currently logged-in admin
-    #     print(request,obj)
     #     if not change:  # If creating a new object
     #         obj.created_by = request.user
     #     obj.save()
 
-@admin.register(Seat)
+# @admin.register(Seat)
 class SeatAdmin(admin.ModelAdmin):
     # actions = ['custom_delete']
     list_display = ('seat_id','location', 'status')
     # list_filter = ('status',)
     list_filter = ('location','status')  # Filter by location
     search_fields = ('seat_id','status','location__description')  # Allows search by seat ID and location description
+
+    # def showLocationName(self,modelObject):
+    #     return f'{modelObject.location.location_name} '
 
     def get_queryset(self, request):
         # Only show objects created by the current user
@@ -128,7 +136,6 @@ class SeatAdmin(admin.ModelAdmin):
         return qs.filter(created_by=request.user)
     
     def save_model(self, request, obj, form, change):
-        print(change,obj)
         if not change:  # If the object is being created
             obj.created_by = request.user
         obj.save()
@@ -139,9 +146,7 @@ class SeatAdmin(admin.ModelAdmin):
             formfield.queryset = Location.objects.filter(created_by=request.user)
         return formfield
 
-
-
-@admin.register(Student)
+# @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
     list_display = ('name', 'phone_no', 'adhar_no', 'status')
     list_filter = ('status',)
@@ -155,7 +160,6 @@ class StudentAdmin(admin.ModelAdmin):
         return qs.filter(created_by=request.user)
     
     def save_model(self, request, obj, form, change):
-        print(change,obj)
         if not change:  # If the object is being created
             obj.created_by = request.user
         obj.save()
@@ -165,3 +169,23 @@ class StudentAdmin(admin.ModelAdmin):
             # Filter locations based on the current user
             formfield.queryset = Location.objects.filter(created_by=request.user)
         return formfield
+
+class UserAdmin(BaseUserAdmin):
+    list_display = ('email', 'first_name', 'last_name')
+    list_filter = ('is_staff', 'is_superuser')
+
+# Re-register UserAdmin
+# admin_site.unregister(User)
+
+# class GroupAdmin(admin.ModelAdmin):
+#     list_display = ('name', 'description')  # Example fields
+
+
+admin_site.register(Seat,SeatAdmin)
+admin_site.register(Location,LocationAdmin)
+admin_site.register(Booking,BookingAdmin)
+admin_site.register(Student,StudentAdmin)
+
+
+admin_site.register(Group)
+admin_site.register(CustomUser)

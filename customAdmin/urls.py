@@ -16,12 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from booking.views import get_seats_by_location
-from customAdmin.admin import admin_site
+from .views import admin_login
 urlpatterns = [
-    path('admin/booking/get_seats_by_location/', get_seats_by_location, name='get_seats_by_location'),
-    path('admin/', admin_site.urls),
-    
-    # path('dj-admin/', admin.site.urls),
-    # path('booking/', include('booking.urls')),
+    path('',admin_login,name='custom_login')
 ]

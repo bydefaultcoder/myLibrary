@@ -53,6 +53,6 @@ def cancel_booking(request, booking_id):
 def get_seats_by_location(request):
     location_id = request.GET.get('location_id')
     print(Location.objects.filter(location_id=location_id)[0])
-    seats = Seat.objects.filter(location_id=location_id)
+    seats = Seat.objects.filter(location_id=location_id, created_by = request.user, status='vacant')
     seat_dict = {seat.pk: str(seat) for seat in seats}
     return JsonResponse(seat_dict)

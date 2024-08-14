@@ -1,32 +1,35 @@
 from django import forms
-# from booking.models import Booking, Seat, Location
-# from models import Booking,Seat,Location
-from .models import Booking,Seat,Location
+from .models import Booking, Seat, Location
+from .models import Booking, Seat, Location, Student
 
 class CustomBookingForm(forms.ModelForm):
     location = forms.ModelChoiceField(queryset=Location.objects.all(), required=False, label='Location')
 
     class Meta:
         model = Booking
-        fields = ['student', 'location', 'seat', 'status']
+        fields = ['student', 'location', 'seat', 'status', 'duration' ,'start_time','end_time']
 
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)  # Extract the current user from the kwargs
+        # Extract the request object from kwargs
+        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
-        print(user,"here")
-        print(self.data.keys,"here")
 
-        # Filter locations by the user who created them
-        if user:
-            self.fields['location'].queryset = Location.objects.filter(created_by=user)
+        # Filter locations by the current user
+        self.fields['student'].queryset = Student.objects.filter(status='inrolled')
+
+        if self.request:
+            self.fields['location'].queryset = Location.objects.filter(created_by=self.request.user)
         else:
             self.fields['location'].queryset = Location.objects.none()
-            
+
+        # Filter seats based on the selected location
+        print('location' in self.data,self.instance.pk,"jjjjjjjj")
         if 'location' in self.data:
             try:
                 location_id = int(self.data.get('location'))
-                self.fields['seat'].queryset = Seat.objects.filter(location_id=location_id)
+                self.fields['seat'].queryset = Seat.objects.filter(status='vacant',location_id=location_id)
             except (ValueError, TypeError):
                 self.fields['seat'].queryset = Seat.objects.none()
         elif self.instance.pk:
-            self.fields['seat'].queryset = self.instance.location.seat_set.all()
+            self.fields['seat'].queryset = self.instance.location.seat_set.filter(status='vacant')
+            # print(self.fields['seat'],"hello")
