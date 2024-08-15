@@ -1,15 +1,17 @@
 from django.contrib import admin
-from customAdmin.admin import admin_site
+from customAdmin.admin import CustomUserAdmin, admin_site
 from customAdmin.models import CustomUser
+# from myLibrary.customAdmin.customAdminForm import CustomUserCreationForm
 from .BookingForm import CustomBookingForm
 from .models import Student,Seat,Booking,Location
 from django.db import transaction
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
 
+admin_site.register(Group)
+admin_site.register(CustomUser,CustomUserAdmin)
 
 class LocationAdmin(admin.ModelAdmin):
     # list_display
@@ -28,7 +30,6 @@ class LocationAdmin(admin.ModelAdmin):
         if request.user.is_superuser:
             return qs
         return qs.filter(created_by=request.user)
-
 
 # @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
@@ -170,22 +171,14 @@ class StudentAdmin(admin.ModelAdmin):
             formfield.queryset = Location.objects.filter(created_by=request.user)
         return formfield
 
-class UserAdmin(BaseUserAdmin):
-    list_display = ('email', 'first_name', 'last_name')
-    list_filter = ('is_staff', 'is_superuser')
-
 # Re-register UserAdmin
 # admin_site.unregister(User)
 
 # class GroupAdmin(admin.ModelAdmin):
 #     list_display = ('name', 'description')  # Example fields
 
-
 admin_site.register(Seat,SeatAdmin)
 admin_site.register(Location,LocationAdmin)
 admin_site.register(Booking,BookingAdmin)
 admin_site.register(Student,StudentAdmin)
 
-
-admin_site.register(Group)
-admin_site.register(CustomUser)

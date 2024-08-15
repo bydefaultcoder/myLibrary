@@ -3,9 +3,7 @@
 import os
 import sys
 import socket
-import pyqrcode 
 # import png 
-from pyqrcode import QRCode 
 hostname = socket.gethostname()
 IPAddr = socket.gethostbyname(hostname)
 
