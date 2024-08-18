@@ -1,3 +1,4 @@
+from typing import Any
 from django import forms
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from .models import CustomUser
@@ -23,6 +24,7 @@ class CustomUserCreationForm(forms.ModelForm):
 
     def save(self, commit=True):
         # Save the provided password in hashed format
+        print("helloooooooooooo")
         user = super().save(commit=False)
         user.set_password(self.cleaned_data["password1"])
         if commit:

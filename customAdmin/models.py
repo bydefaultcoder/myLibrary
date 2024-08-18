@@ -44,14 +44,14 @@ class CustomUser(AbstractUser,PermissionsMixin):
     REQUIRED_FIELDS = [ 'email']
     
 
-    # def save(self, *args, **kwargs) -> None:
-    #     if not self.pk and self.expiry_date:
-    #         self.expiry_date = self.date_joined + relativedelta(months=1)
-    #     # else:
+    def save(self, *args, **kwargs) -> None:
+        # if not self.pk and self.expiry_date:
+        #     self.expiry_date = self.date_joined + relativedelta(months=1)
+        # # else:
+        print(self.first_name,self.last_name)
 
-    #     return super().save( *args, **kwargs)
+
+        return super().save( *args, **kwargs)
 
     def __str__(self):
         return self.username
-    
-# class 

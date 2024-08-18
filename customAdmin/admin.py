@@ -56,39 +56,33 @@ class MyLibraryAdminSite(AdminSite):
     
     
 class CustomUserAdmin(BaseUserAdmin):
-    add_form = CustomUserCreationForm
-    form = CustomUserCreationForm
+    add_form = CustomUserCreationForm  # Use custom form for adding users
+    model = CustomUser
+    list_display = ('email', 'is_staff', 'is_superuser', 'is_active')
+    search_fields = ('email',)
+    ordering = ('username',)
 
-    # Display these fields in the admin panel
-    list_display = ('email', 'username','first_name', 'is_staff','expiry_date', 'is_superuser')
-    # Define fieldsets for displaying and editing the user model
-    # Define which fields to show in the admin
     fieldsets = (
-        (None, {'fields': ('username', 'password')}),
-        ('Personal info', {'fields': ('first_name', 'last_name', 'email')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
-        ('Important dates', {'fields': ('last_login', 'date_joined')}),
+        (None, {'fields': ('email', 'password','library_name','library_address')}),
+        ('Permissions', {'fields': ('is_staff', 'is_active', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Important dates', {'fields': ('last_login',)}),
     )
+
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'email', 'password1', 'password2'),
+            'fields': ('email', 'password1', 'password2', 'is_staff', 'is_superuser', 'is_active'),
         }),
     )
-
-    list_display = ('username', 'get_password_hash','email', 'first_name', 'last_name', 'is_staff')
-    search_fields = ('username', 'first_name', 'last_name', 'email')
-    ordering = ('username',)
     filter_horizontal = ('groups', 'user_permissions')  # Enable horizontal filtering for groups and permissions
 
-    def get_password_hash(self, obj):
-        return obj.password
-    get_password_hash.short_description = 'Password Hash'
+    
 
     def save_model(self, request, obj, form, change):
         # Only set password if it's being provided (for new users or if password is being changed)
         # obj.first_name = form.cleaned_data.get('first_name', obj.first_name)
         # obj.last_name = form.cleaned_data.get('last_name', obj.last_name)
+        print("567888888888888")
         password = form.cleaned_data.get('password1') or form.cleaned_data.get('password')
         if password:
             obj.set_password(password)
