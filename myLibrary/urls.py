@@ -16,10 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from booking.views import get_seats_by_location
+from booking.views import get_seats_by_location,get_seat_available_timing
 from customAdmin.admin import admin_site
 urlpatterns = [
     path('admin/booking/get_seats_by_location/', get_seats_by_location, name='get_seats_by_location'),
+    path('admin/booking/get_timming_by_seat/', get_seat_available_timing, name='get_timming_by_seat'),
     path('admin/', admin_site.urls),
     
     # path('dj-admin/', admin.site.urls),

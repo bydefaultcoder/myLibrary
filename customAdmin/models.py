@@ -1,5 +1,7 @@
+from typing import Iterable
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import BaseUserManager, PermissionsMixin
+from dateutil.relativedelta import relativedelta
 # Create your models here.
 from django.contrib.auth.models import AbstractUser
 # from groups
@@ -26,10 +28,11 @@ class CustomUserManager(BaseUserManager):
 class CustomUser(AbstractUser,PermissionsMixin):
     email = models.EmailField(unique=True)
     username = models.CharField(blank=False,null=False,max_length=200,unique=True)
-    library_name = models.CharField(blank=False,null=False,max_length=200,unique=True)
+    library_name = models.CharField(blank=True,null=True,max_length=200)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
+    expiry_date = models.DateTimeField(blank=True,null=True)
     # birthdate = models.DateField(null=True, blank=True)
     library_address = models.TextField(max_length=500, blank=True)
     # location = models.CharField(max_length=30, blank=True)
@@ -39,6 +42,14 @@ class CustomUser(AbstractUser,PermissionsMixin):
 
         # USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = [ 'email']
+    
+
+    # def save(self, *args, **kwargs) -> None:
+    #     if not self.pk and self.expiry_date:
+    #         self.expiry_date = self.date_joined + relativedelta(months=1)
+    #     # else:
+
+    #     return super().save( *args, **kwargs)
 
     def __str__(self):
         return self.username

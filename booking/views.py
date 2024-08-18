@@ -1,3 +1,4 @@
+from  datetime import time
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -53,6 +54,48 @@ def cancel_booking(request, booking_id):
 def get_seats_by_location(request):
     location_id = request.GET.get('location_id')
     print(Location.objects.filter(location_id=location_id)[0])
-    seats = Seat.objects.filter(location_id=location_id, created_by = request.user, status='vacant')
+    seats = Seat.objects.filter(location_id=location_id, created_by = request.user)
     seat_dict = {seat.pk: str(seat) for seat in seats}
     return JsonResponse(seat_dict)
+
+def get_seat_available_timing(request):
+    """
+    API view to get available hours for a specific seat based on already booked slots.
+    """
+    seat_id = request.GET.get('seat_id')
+    seat = Seat.objects.get(seat_id=seat_id)
+    
+    return JsonResponse(_filter_available_hours(seat))
+
+def _filter_available_hours(seat):
+    """
+    Filter the start and end time options based on already booked slots for the seat.
+    """
+    # Get existing bookings for this seat
+    booked_slots = Booking.objects.filter(seat=seat)
+
+    # Get all full hours from 00:00 to 23:00
+    all_hours = [time(hour=h) for h in range(24)]  # Generates times like 00:00:00, 01:00:00, ..., 23:00:00
+
+    # Initialize the list for storing unavailable hours
+    unavailable_hours = set()
+
+    # Mark unavailable hours based on existing bookings
+    for booking in booked_slots:
+        start_hour = booking.start_time.hour
+        end_hour = booking.end_time.hour
+
+        # Mark all hours between the start and end times as unavailable
+        unavailable_hours.update(range(start_hour+1, end_hour))  # Include all hours between start and end
+
+    # Filter out unavailable hours to get the available ones
+    print(all_hours)
+    print(unavailable_hours)
+    available_hours = [hour for hour in all_hours if hour.hour not in unavailable_hours]
+
+    available_choices = [hour.hour for hour in available_hours]
+
+    print(available_choices)
+
+    return {"data":available_choices}
+    

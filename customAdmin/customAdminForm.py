@@ -12,6 +12,7 @@ class CustomUserCreationForm(forms.ModelForm):
         # Add any additional fields you want the form to handle (e.g., first_name, last_name)
         fields = ('email', 'first_name', 'last_name', 'is_staff', 'is_superuser')  # Add your custom fields here
 
+
     def clean_password2(self):
         # Check that the two password entries match
         password1 = self.cleaned_data.get("password1")

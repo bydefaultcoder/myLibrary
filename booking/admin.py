@@ -3,12 +3,14 @@ from customAdmin.admin import CustomUserAdmin, admin_site
 from customAdmin.models import CustomUser
 # from myLibrary.customAdmin.customAdminForm import CustomUserCreationForm
 from .BookingForm import CustomBookingForm
-from .models import Student,Seat,Booking,Location
+from .models import Monthly_prizing, Payments, Student,Seat,Booking,Location
 from django.db import transaction
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
+from django.db.models import Min, Max
+
 
 admin_site.register(Group)
 admin_site.register(CustomUser,CustomUserAdmin)
@@ -33,12 +35,25 @@ class LocationAdmin(admin.ModelAdmin):
 
 # @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
-    list_display = ('Studnt_Name', 'Seat_no', 'booking_time', 'status', 'duration')
+    list_display = ('Studnt_Name', 'Seat_no', 'booking_time', 'timming', 'duration')
     list_filter = ('status',)
     search_fields = ('getStuName', 'seat')
     form = CustomBookingForm
 
     actions = ['custom_bulk_delete']
+
+    def timming(self,modelObject):
+        return f"{self.convertToReadableTimeing(f"{modelObject.start_time}")} to {self.convertToReadableTimeing(f"{modelObject.end_time}")}"
+    
+    def convertToReadableTimeing(self,time_str):
+        t = int(time_str.split(":")[0])
+        if t>=13:
+            return f"{t-12} PM"
+        else:
+            return f"{t} AM"
+
+
+
 
     def get_form(self, request, obj=None, **kwargs):
         # Get the form class first
@@ -121,13 +136,30 @@ class BookingAdmin(admin.ModelAdmin):
 # @admin.register(Seat)
 class SeatAdmin(admin.ModelAdmin):
     # actions = ['custom_delete']
-    list_display = ('seat_id','location', 'status')
+    list_display = ('seat_id','location','start_and_end_timing', 'status')
     # list_filter = ('status',)
     list_filter = ('location','status')  # Filter by location
     search_fields = ('seat_id','status','location__description')  # Allows search by seat ID and location description
 
     # def showLocationName(self,modelObject):
     #     return f'{modelObject.location.location_name} '
+
+    def start_and_end_timing(self, modelObject):
+        # Filter bookings for the specific seat
+        seatObj = Booking.objects.filter(seat=modelObject)
+
+        # Aggregate to get the earliest start_time and the latest end_time
+        start_time = seatObj.aggregate(start_time=Min('start_time'))['start_time']
+        end_time = seatObj.aggregate(end_time=Max('end_time'))['end_time']
+
+        # # Check if both times exist
+        if start_time and end_time:
+            # Return the duration between start and end times
+            # duration = end_time - start_time
+            return f'{start_time} - {end_time}'
+        else:
+            return 'no booking'
+        # return '333'
 
     def get_queryset(self, request):
         # Only show objects created by the current user
@@ -176,7 +208,17 @@ class StudentAdmin(admin.ModelAdmin):
 
 # class GroupAdmin(admin.ModelAdmin):
 #     list_display = ('name', 'description')  # Example fields
+class Monthly_prizingAdmin(admin.ModelAdmin):
+    list_display = ('hours', 'prize', 'discription', 'status')
+    list_filter = ('status','hours', 'prize')
+    search_fields = ('hours', 'phone_no')
+class PaymentsAdmin(admin.ModelAdmin):
+    list_display = ('booking_to_update', 'prize', 'payment_time')
+    list_filter = ('payment_time', 'prize')
+    search_fields = ('prize',)
 
+admin_site.register(Payments,PaymentsAdmin)
+admin_site.register(Monthly_prizing,Monthly_prizingAdmin)
 admin_site.register(Seat,SeatAdmin)
 admin_site.register(Location,LocationAdmin)
 admin_site.register(Booking,BookingAdmin)

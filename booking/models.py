@@ -76,7 +76,7 @@ def update_location_on_seat_delete(sender, instance, **kwargs):
 
 class Student(models.Model):
     STATUS_CHOICES = [
-        ('inrolled', 'Inrolled'),
+        ('enrolled', 'Enrolled'),
         ('alloted', 'Alloted'),
         ('suspended', 'Suspended'),
     ]
@@ -95,10 +95,10 @@ class Student(models.Model):
         # Check if the status has changed
         if self.pk:
             old_status = Student.objects.get(pk=self.pk).status
-            if old_status == 'inrolled':
+            if old_status == 'enrolled':
                 self.status = 'alloted'
             else:
-                self.status = 'Inrolled'
+                self.status = 'enrolled'
 
         super().save(*args, **kwargs)
 
@@ -107,12 +107,13 @@ class Booking(models.Model):
         ('active', 'Active'),
         ('inactive', 'Inactive'),
     ]
+    
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     seat = models.ForeignKey(Seat, on_delete=models.CASCADE)
     booking_time = models.DateTimeField(auto_now_add=True)
 
-    start_time = models.DateTimeField(default=tz.now)
-    end_time = models.DurationField(default=tz.now)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
 
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active',blank=False,null=False)
     duration = models.DurationField( default=tz.timedelta(days=30))
@@ -125,10 +126,11 @@ class Booking(models.Model):
 
         student.status = 'alloted'
         seat.status = 'engaged'
+        print(self.start_time,self.end_time,"here")
         try:
             with transaction.atomic():
                 # problem
-                # super().save()
+                # super().save()    
                 print("hello")
                 seat.save()
                 student.save()
@@ -141,14 +143,15 @@ class Booking(models.Model):
 @receiver(post_delete,sender=Booking)
 @transaction.atomic
 def update_seat_on_delete_booking(sender, instance:Booking, **kwargs):
-    seat = instance.seat
     student = instance.student
-    student.status = 'inrolled' 
-    seat.status = 'vacant'
+    student.status = 'enrolled' 
     try:
         with transaction.atomic():
-            print(seat.seat_id,student.phone_no,"updated succesfully")
-            seat.save()
+            # print(seat.seat_id,student.phone_no,"updated succesfully")
+            seat = instance.seat
+            if Booking.objects.filter(seat=seat).count() >=1:
+                seat.status = 'vacant'
+                seat.save()
             student.save()
  
         print("updated succesfully")
@@ -165,3 +168,29 @@ def update_seat_on_delete_booking(sender, instance:Booking, **kwargs):
 
 
 
+class Monthly_prizing(models.Model):
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('inactive', 'Inactive'),
+        # ('suspended', 'Suspended'),
+    ]
+    timming_id = models.AutoField(primary_key=True, verbose_name="Location No")
+    hours = models.PositiveIntegerField(verbose_name='No. of hours')
+    prize = models.PositiveIntegerField(verbose_name='Monthly price(in rupees)')
+    discription = models.TextField()
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
+    created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL ,null= True,blank=False,editable=False)
+
+    def __str__(self):
+        return f'cost {self.prize} 1 month in rupee{self.prize}'
+
+
+class Payments(models.Model):
+    payment_id = models.AutoField(primary_key=True, verbose_name="Location No")
+    booking_to_update = models.ForeignKey(Booking, on_delete=models.CASCADE)
+    prize = models.PositiveIntegerField(verbose_name='Monthly price(in rupees)')
+    payment_time = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL ,null= True,blank=False,editable=False)
+
+    def __str__(self):
+        return f'cost {self.prize} 1 month in rupee{self.prize}'
