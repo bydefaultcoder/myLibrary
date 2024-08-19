@@ -63,31 +63,31 @@ class CustomUserAdmin(BaseUserAdmin):
     ordering = ('username',)
 
     fieldsets = (
-        (None, {'fields': ('email', 'password','library_name','library_address')}),
+        (None, {'fields': ('email', 'username','password','library_name','library_address','expiry_date')}),
         ('Permissions', {'fields': ('is_staff', 'is_active', 'is_superuser', 'groups', 'user_permissions')}),
-        ('Important dates', {'fields': ('last_login',)}),
+        # ('Important dates', {'fields': ('last_login',)}),
     )
 
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'password1', 'password2', 'is_staff', 'is_superuser', 'is_active'),
+            'fields': ('email', 'password1','username', 'password2', 'is_staff', 'is_superuser', 'is_active'),
         }),
     )
     filter_horizontal = ('groups', 'user_permissions')  # Enable horizontal filtering for groups and permissions
 
     
 
-    def save_model(self, request, obj, form, change):
-        # Only set password if it's being provided (for new users or if password is being changed)
-        # obj.first_name = form.cleaned_data.get('first_name', obj.first_name)
-        # obj.last_name = form.cleaned_data.get('last_name', obj.last_name)
-        print("567888888888888")
-        password = form.cleaned_data.get('password1') or form.cleaned_data.get('password')
-        if password:
-            obj.set_password(password)
+    # def save_model(self, request, obj, form, change):
+    #     # Only set password if it's being provided (for new users or if password is being changed)
+    #     # obj.first_name = form.cleaned_data.get('first_name', obj.first_name)
+    #     # obj.last_name = form.cleaned_data.get('last_name', obj.last_name)
+    #     if not request.user:
+    #         password = form.cleaned_data.get('password1') or form.cleaned_data.get('password')
+    #         if password:
+    #             obj.set_password(password)
             
-        super().save_model(request, obj, form, change)
+    #     super().save_model(request, obj, form, change)
 
 
 admin_site = MyLibraryAdminSite()

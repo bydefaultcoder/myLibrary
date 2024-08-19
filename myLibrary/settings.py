@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 import os
 from pathlib import Path
+# from jazzminsettings import jazzmin_setting
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -34,6 +35,7 @@ ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     # "admin_interface",
     # "colorfield",
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -53,9 +55,9 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    # 'customAdmin.expirymiddleware.CheckUserExpiryMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'customAdmin.expirymiddleware.CheckUserExpiryMiddleware',
 ]
 TEMPLATES = os.path.join(BASE_DIR,"templates")
 print(TEMPLATES)
@@ -137,7 +139,7 @@ STATICFILES_DIRS=[  STATIC_DIR,   ]
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'customAdmin.CustomUser'
-
+# JAZZMIN_SETTINGS = jazzmin_setting
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
 SILENCED_SYSTEM_CHECKS = ["security.W019"]

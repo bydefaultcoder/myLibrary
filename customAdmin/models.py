@@ -45,9 +45,9 @@ class CustomUser(AbstractUser,PermissionsMixin):
     
 
     def save(self, *args, **kwargs) -> None:
-        # if not self.pk and self.expiry_date:
-        #     self.expiry_date = self.date_joined + relativedelta(months=1)
-        # # else:
+        if not self.pk :
+            self.expiry_date = self.date_joined + relativedelta(months=1)
+        # else:
         print(self.first_name,self.last_name)
 
 
