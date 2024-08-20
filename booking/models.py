@@ -48,7 +48,8 @@ class Seat(models.Model):
         ('engaged', 'Engaged'),
         ('inactive', 'Inactive'),
     ]
-    seat_id = models.AutoField(primary_key=True, verbose_name="Seat No")
+    seat_id = models.AutoField(primary_key=True, verbose_name="Seat Id")
+    seat_no = models.PositiveIntegerField(blank=True,null=True, verbose_name="Seat No",editable=False)
     location = models.ForeignKey(Location, on_delete=models.CASCADE, verbose_name='Location no.')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='vacant')
     deleted = models.BooleanField(default=False,blank=None,null=False)
@@ -60,7 +61,11 @@ class Seat(models.Model):
         force_update = kwargs.pop('force_update', False)
         is_new = self.pk is None
         # super().save(self, *args, **kwargs)
+        if is_new:
+           self.seat_no = Seat.objects.filter(location=self.location).count()+ 1
+           
         super().save(force_insert=force_insert, force_update=force_update, *args, **kwargs)
+
         if is_new:
             self.location.number_of_seats= self.location.number_of_seats + 1
             self.location.save()
@@ -80,7 +85,7 @@ class Student(models.Model):
         ('alloted', 'Alloted'),
         ('suspended', 'Suspended'),
     ]
-
+    stu_no = models.PositiveIntegerField(blank=True,null=True,editable=False)
     name = models.CharField(max_length=100)
     phone_no = models.CharField(max_length=15)
     address = models.TextField()
@@ -93,12 +98,15 @@ class Student(models.Model):
     
     def save(self, *args, **kwargs):
         # Check if the status has changed
+        
         if self.pk:
             old_status = Student.objects.get(pk=self.pk).status
             if old_status == 'enrolled':
                 self.status = 'alloted'
             else:
                 self.status = 'enrolled'
+        else:
+           self.stu_no = Student.objects.filter(created_by=self.created_by).count()+ 1
 
         super().save(*args, **kwargs)
 
@@ -123,10 +131,9 @@ class Booking(models.Model):
     def save(self, *args, **kwargs) -> None:
         seat = self.seat
         student = self.student
-
         student.status = 'alloted'
         seat.status = 'engaged'
-        print(self.start_time,self.end_time,"here")
+        # print(self.start_time,self.end_time,"here")
         try:
             with transaction.atomic():
                 # problem
@@ -154,7 +161,7 @@ def update_seat_on_delete_booking(sender, instance:Booking, **kwargs):
                 seat.save()
             student.save()
  
-        print("updated succesfully")
+        # print("updated succesfully")
     except Exception as e:
         print("Error..")
 

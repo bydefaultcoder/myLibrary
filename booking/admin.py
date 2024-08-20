@@ -1,4 +1,5 @@
 from django.contrib import admin
+from .filters import SeatFilterByLocations
 from customAdmin.admin import CustomUserAdmin, admin_site
 from customAdmin.models import CustomUser
 # from myLibrary.customAdmin.customAdminForm import CustomUserCreationForm
@@ -136,10 +137,14 @@ class BookingAdmin(admin.ModelAdmin):
 # @admin.register(Seat)
 class SeatAdmin(admin.ModelAdmin):
     # actions = ['custom_delete']
-    list_display = ('seat_id','location','start_and_end_timing', 'status')
+    list_display = ('seat_no','location','start_and_end_timing')
+    ordering = ('seat_no',)
     # list_filter = ('status',)
-    list_filter = ('location','status')  # Filter by location
-    search_fields = ('seat_id','status','location__description')  # Allows search by seat ID and location description
+    list_filter = (SeatFilterByLocations,)  # Filter by location
+    # search_fields = ('seat_no','status','location__description')  # Allows search by seat ID and location description
+
+    class Meta:
+        ordering = ['-seat_no']  # Sorts by title in ascending order
 
     # def showLocationName(self,modelObject):
     #     return f'{modelObject.location.location_name} '
@@ -170,20 +175,29 @@ class SeatAdmin(admin.ModelAdmin):
     
     def save_model(self, request, obj, form, change):
         if not change:  # If the object is being created
+            # obj.seat_no = Seat.objects.filter(location=obj.location).count()+ 1
+            # print("hello here is seat no" ,obj.seat_no)
             obj.created_by = request.user
         obj.save()
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        # print(db_field)s
         formfield = super().formfield_for_foreignkey(db_field, request, **kwargs)
         if db_field.name == 'location':
             # Filter locations based on the current user
             formfield.queryset = Location.objects.filter(created_by=request.user)
+        if db_field.name == 'student':
+            # Filter locations based on the current user
+            formfield.queryset = Student.objects.filter(created_by=request.user)
         return formfield
 
 # @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ('name', 'phone_no', 'adhar_no', 'status')
+    list_display = ('stu_no','name', 'phone_no', 'adhar_no', 'status')
     list_filter = ('status',)
     search_fields = ('name', 'phone_no', 'adhar_no')
+
+    class Meta:
+        ordering = ['stu_no']  # Sorts by title in ascending order
 
     def get_queryset(self, request):
         # Only show objects created by the current user
@@ -191,6 +205,8 @@ class StudentAdmin(admin.ModelAdmin):
         if request.user.is_superuser:
             return qs
         return qs.filter(created_by=request.user)
+    # def 
+    
     
     def save_model(self, request, obj, form, change):
         if not change:  # If the object is being created

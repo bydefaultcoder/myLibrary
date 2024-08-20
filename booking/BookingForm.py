@@ -19,6 +19,7 @@ class CustomBookingForm(forms.ModelForm):
     
     hours = forms.ChoiceField(choices= hour_duratios,label="Hours")
     location = forms.ModelChoiceField(queryset=Location.objects.all(), required=False, label='Location')
+    # student = forms.ModelChoiceField(queryset=Student.objects.all(), required=False, label='student')
     class Meta:
         model = Booking
         fields = ['student', 'location', 'seat', 'status', 'hours','start_time', 'end_time', 'duration' ]
@@ -30,8 +31,8 @@ class CustomBookingForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         # Filter students based on status (only enrolled students)
-        print("form created...............")
-        self.fields['student'].queryset = Student.objects.filter(status='enrolled')
+        # print("form created...............")
+        self.fields['student'].queryset = Student.objects.filter(status='enrolled',created_by=self.request.user)
 
         # Filter locations based on user-created ones if the request is available
         if self.request:

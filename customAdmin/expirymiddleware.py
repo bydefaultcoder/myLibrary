@@ -18,7 +18,7 @@ class CheckUserExpiryMiddleware:
         today_time = timezone.now().time()
         print("middleware is called")
         userObj = CustomUser.objects.get(pk=request.user.pk)
-        print(userObj.expiry_date )
+        # print(userObj.expiry_date )
         if  userObj.expiry_date:
             db_time = userObj.expiry_date.time()
             if today_time < db_time:
