@@ -21,7 +21,8 @@ class CheckUserExpiryMiddleware:
         # print(userObj.expiry_date )
         if  userObj.expiry_date:
             db_time = userObj.expiry_date.time()
-            if today_time < db_time:
+            print(today_time,db_time)
+            if today_time > db_time:
                 print("user not expired")
             else :
                 print("user expired")
