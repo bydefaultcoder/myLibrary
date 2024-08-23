@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 # from jazzminsettings import jazzmin_setting
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -22,10 +25,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-m8lfd_a%orm8cpyvwz76_c4^#an@=p695_xlb9twd-6x*6w$3r'
-
+SECRET_KEY = os.getenv('SECRET_KEY')
+DATABASE_URL = os.getenv('DATABASE_URL')
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG') == 'True'
 
 ALLOWED_HOSTS = ['*']
 
@@ -100,12 +103,20 @@ WSGI_APPLICATION = 'myLibrary.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+os.getenv('DATABASE_URL')
+DATABASES = {  
+    'default': {  
+        'ENGINE': 'django.db.backends.mysql',  
+        'NAME': os.getenv('DATABASE_NAME'),  
+        'USER': os.getenv('DATABASE_USER'),  
+        'PASSWORD': os.getenv('DATABASE_PASSWORD'),  
+        'HOST': os.getenv('DATABASE_HOST'),  
+        'PORT': os.getenv('DATABASE_PORT'),
+        'OPTIONS': {  
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"  
+        }  
+    }  
+}  
 
 
 # Password validation
