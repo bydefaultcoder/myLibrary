@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from .models import Seat, Booking,Location
+from .models import MonthlyPlan, Seat, Booking,Location
 from django.contrib import messages
 
 
@@ -55,7 +55,7 @@ def get_seats_by_location(request):
     location_id = request.GET.get('location_id')
     print(Location.objects.filter(location_id=location_id)[0])
     seats = Seat.objects.filter(location_id=location_id, created_by = request.user)
-    seat_dict = {seat.pk: str(seat) for seat in seats}
+    seat_dict = {seat.pk: f"seatNo:{seat.seat_no}" for seat in seats}
     return JsonResponse(seat_dict)
 
 def get_seat_available_timing(request):
@@ -98,4 +98,15 @@ def _filter_available_hours(seat):
     print(available_choices)
 
     return {"data":available_choices}
+
+def get_mothlyplans_by_user(request):
+    """
+    API view to get available hours for a specific seat based on already booked slots.
+    """
+    currentUserPK = request.GET.get('currentUserPK')
+    print(currentUserPK)
+    plans = MonthlyPlan.objects.filter(created_by =currentUserPK)
+    print(plans)
+    
+    return JsonResponse({"data":list(plans.values())})
     

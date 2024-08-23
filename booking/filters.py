@@ -12,7 +12,7 @@ class SeatFilterByLocations(SimpleListFilter):
     def lookups(self, request, model_admin):
         # Define the options for filtering
         locations = Location.objects.filter(created_by=request.user)
-        list_of_locations = [(i,i.location_name) for i in locations]
+        list_of_locations = [(i.pk,i.location_name) for i in locations]
         return list_of_locations
 
     def queryset(self, request, queryset):

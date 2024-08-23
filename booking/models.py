@@ -6,6 +6,8 @@ from django.db import transaction
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone as tz
+from django.core.validators import MinValueValidator,MaxValueValidator
+
 
 from customAdmin.models import CustomUser
 # import calendar
@@ -22,6 +24,9 @@ class Location(models.Model):
     number_of_seats = models.PositiveIntegerField(verbose_name='No of Seats')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
     created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL ,null= True,blank=False,editable=False)
+    class Meta:
+        verbose_name = "Location"          # Singular form
+        verbose_name_plural = "Locations"  # Plural form
 
     def __str__(self):
         return f'{self.location_name}-{self.location_id}'
@@ -54,6 +59,9 @@ class Seat(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='vacant')
     deleted = models.BooleanField(default=False,blank=None,null=False)
     created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True,editable=False)
+    class Meta:
+        verbose_name = "Seat"          # Singular form
+        verbose_name_plural = "Seats"  # Plural form
 
     def save(self, *args, **kwargs):
         # Check if this is a new location by verifying if location_id is None
@@ -92,6 +100,9 @@ class Student(models.Model):
     adhar_no = models.CharField(max_length=12, unique=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
     created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True,editable=False)
+    class Meta:
+        verbose_name = "Student"          # Singular form
+        verbose_name_plural = "Students"  # Plural form
 
     def __str__(self):
         return f"{self.name} ({self.status})"
@@ -111,39 +122,55 @@ class Student(models.Model):
         super().save(*args, **kwargs)
 
 class Booking(models.Model):
+    location = None
+    plan = None
+    discount = None
+    total_amount = None
     STATUS_CHOICES = [
         ('active', 'Active'),
         ('inactive', 'Inactive'),
     ]
-    
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     seat = models.ForeignKey(Seat, on_delete=models.CASCADE)
     booking_time = models.DateTimeField(auto_now_add=True)
-
+    joining_date = None
+    remain_no_of_months = None
     start_time = models.TimeField()
     end_time = models.TimeField()
-
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active',blank=False,null=False)
     duration = models.DurationField( default=tz.timedelta(days=30))
-    # created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True,editable=False)
     created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True,editable=False)
+    class Meta:
+        verbose_name = "Seat Booking"          # Singular form
+        verbose_name_plural = "Seat Bookings"  # Plural form
 
     def save(self, *args, **kwargs) -> None:
         seat = self.seat
         student = self.student
         student.status = 'alloted'
         seat.status = 'engaged'
-        # print(self.start_time,self.end_time,"here")
-        try:
-            with transaction.atomic():
-                # problem
-                # super().save()    
-                print("hello")
-                seat.save()
-                student.save()
-                super().save(*args, **kwargs)
-        except Exception as e:
-            print("Error.." ,e)
+        print(kwargs,args)
+        print(self.student,self.seat,self.location,self.plan,self.start_time,self.end_time,self.remain_no_of_months,self.discount,self.joining_date,self.total_amount,"here")
+            # {-'student': <Student: Vinay (enrolled)>, 
+        amount = int(self.plan.split("_")[1]) * int(self.remain_no_of_months)
+        print(self.pk,"pk here 156" ,self.pk is None,self.pk==None)
+        if self.pk is None:
+            try:
+                with transaction.atomic():
+                    print("hello")
+                    seat.save()
+                    student.save()
+                    super().save(*args, **kwargs)
+                    Payment.objects.create(booking=self,
+                                           amount = amount,
+                                           paid_amount=self.total_amount,
+                                           discount=self.discount,
+                                           joining_date = self.joining_date,
+                                           remain_no_of_months = self.remain_no_of_months,
+                                           created_by=self.created_by)
+            except Exception as e:
+                print("Error.." ,e)
+
     def __str__(self):
         return f'name:{self.student.name} - room/hall:{self.seat.location.location_id} - seat no: {self.seat.seat_id} - ({self.status})'
 
@@ -175,14 +202,14 @@ def update_seat_on_delete_booking(sender, instance:Booking, **kwargs):
 
 
 
-class Monthly_prizing(models.Model):
+class MonthlyPlan(models.Model):
     STATUS_CHOICES = [
         ('active', 'Active'),
         ('inactive', 'Inactive'),
         # ('suspended', 'Suspended'),
     ]
     timming_id = models.AutoField(primary_key=True, verbose_name="Location No")
-    hours = models.PositiveIntegerField(verbose_name='No. of hours')
+    hours = models.PositiveIntegerField(verbose_name='No. of hours',validators=[MinValueValidator(1)])
     prize = models.PositiveIntegerField(verbose_name='Monthly price(in rupees)')
     discription = models.TextField()
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
@@ -190,14 +217,24 @@ class Monthly_prizing(models.Model):
 
     def __str__(self):
         return f'cost {self.prize} 1 month in rupee{self.prize}'
+    class Meta:
+        verbose_name = "Monthly Plan"          # Singular form
+        verbose_name_plural = "Monthly Plans"  # Plural form
 
 
-class Payments(models.Model):
+class Payment(models.Model):
     payment_id = models.AutoField(primary_key=True, verbose_name="Location No")
-    booking_to_update = models.ForeignKey(Booking, on_delete=models.CASCADE)
-    prize = models.PositiveIntegerField(verbose_name='Monthly price(in rupees)')
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE)
+    amount = models.DecimalField( decimal_places=2,max_digits=6,verbose_name='Amount (₹)',validators=[MinValueValidator(1)])
+    paid_amount = models.DecimalField( decimal_places=2,max_digits=6,verbose_name='Paid Amount (₹)',validators=[MinValueValidator(1)])
+    discount = models.DecimalField(decimal_places=2,max_digits=6,verbose_name='Discount (in %)',validators=[MinValueValidator(100)])
     payment_time = models.DateTimeField(auto_now_add=True)
+    joining_date = models.DateField(blank=False,null=False, verbose_name="Joining from",default=tz.now())
+    remain_no_of_months = models.PositiveIntegerField(default=1,verbose_name="No. of Months",validators=[MinValueValidator(1)])
     created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL ,null= True,blank=False,editable=False)
+    class Meta:
+        verbose_name = "Payment"          # Singular form
+        verbose_name_plural = "Payments"  # Plural form
 
     def __str__(self):
-        return f'cost {self.prize} 1 month in rupee{self.prize}'
+        return f'Bookingid:{self.booking.pk},{self.paid_amount},monthAdded:{self.remain_no_of_months}'

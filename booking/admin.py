@@ -4,13 +4,17 @@ from customAdmin.admin import CustomUserAdmin, admin_site
 from customAdmin.models import CustomUser
 # from myLibrary.customAdmin.customAdminForm import CustomUserCreationForm
 from .BookingForm import CustomBookingForm
-from .models import Monthly_prizing, Payments, Student,Seat,Booking,Location
+from .models import MonthlyPlan, Payment, Student,Seat,Booking,Location
 from django.db import transaction
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
 from django.db.models import Min, Max
+import logging
+from django.utils import timezone as tz
+from dateutil.relativedelta import relativedelta
+logger = logging.getLogger(__name__)
 
 
 admin_site.register(Group)
@@ -36,7 +40,8 @@ class LocationAdmin(admin.ModelAdmin):
 
 # @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
-    list_display = ('Studnt_Name', 'Seat_no', 'booking_time', 'timming', 'duration')
+    # list_display = ('Studnt_Name', 'Seat_no', 'booking_time', 'timming', 'duration',)
+    list_display = ('Studnt_Name', 'Seat_no', 'booking_time', 'timming','days_to_expire')
     list_filter = ('status',)
     search_fields = ('getStuName', 'seat')
     form = CustomBookingForm
@@ -45,6 +50,24 @@ class BookingAdmin(admin.ModelAdmin):
 
     def timming(self,modelObject):
         return f"{self.convertToReadableTimeing(f"{modelObject.start_time}")} to {self.convertToReadableTimeing(f"{modelObject.end_time}")}"
+
+    def days_to_expire(self,modelObject):
+        objects  = Payment.objects.filter(booking=modelObject.pk)
+        currentMonthObj = None
+        for obj in objects:
+            print(obj.joining_date,obj.remain_no_of_months)
+            commingdate = obj.joining_date + relativedelta(months=obj.remain_no_of_months)
+            days_remain = commingdate - tz.now().date()
+            if obj.joining_date <= tz.now().date():
+               if  days_remain.days <0:
+                   return "Expired"
+               elif days_remain.days ==0:
+                   return "Expiring today"
+               else:
+                   return f"{days_remain.days} days to expire"
+               currentMonthObj = obj
+        print(objects)
+        return ""
     
     def convertToReadableTimeing(self,time_str):
         t = int(time_str.split(":")[0])
@@ -52,10 +75,6 @@ class BookingAdmin(admin.ModelAdmin):
             return f"{t-12} PM"
         else:
             return f"{t} AM"
-
-
-
-
     def get_form(self, request, obj=None, **kwargs):
         # Get the form class first
         form = super().get_form(request, obj, **kwargs)
@@ -69,8 +88,17 @@ class BookingAdmin(admin.ModelAdmin):
         return CustomFormWithRequest
 
     class Media:
-        js = ('admin/js/jquery.init.js',  # Make sure jQuery is loaded before your custom script
-              'booking/js/booking_admin.js',)  # Your custom JavaScript file
+        css = {
+            'all': (
+                'https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.2/dist/css/select2.min.css',
+                # Include any additional CSS files here
+            )
+        }
+        js = (
+            'https://code.jquery.com/jquery-3.6.0.min.js',  # jQuery library
+            'https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.2/dist/js/select2.min.js',  # Select2 library
+            'booking/js/booking_admin.js',  # Your custom JavaScript file
+        )
     def Studnt_Name(self,modelObject):
         return modelObject.student.name
 
@@ -114,9 +142,23 @@ class BookingAdmin(admin.ModelAdmin):
     
 
     def save_model(self, request, obj, form, change):
-        if not change:
-            obj.created_by = request.user
-        obj.save()
+        if form.is_valid():
+        # Attach extra fields to the model instance
+            obj.location = form.cleaned_data.get('location')
+            obj.discount = form.cleaned_data.get('discount')
+            obj.plan = form.cleaned_data.get('plan')
+            obj.total_amount = form.cleaned_data.get('total_amount')
+            obj.remain_no_of_months = form.cleaned_data.get('remain_no_of_months')
+            obj.joining_date = form.cleaned_data.get('joining_date')
+            logger.info(msg=f"{obj} hello line no 63")
+            if not change:
+              obj.created_by = request.user
+            return obj.save()
+            # super().save_model(request, obj, form, change)
+        else:
+            logger.info("form is not valid")
+
+
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         formfield = super().formfield_for_foreignkey(db_field, request, **kwargs)
@@ -205,9 +247,7 @@ class StudentAdmin(admin.ModelAdmin):
         if request.user.is_superuser:
             return qs
         return qs.filter(created_by=request.user)
-    # def 
-    
-    
+
     def save_model(self, request, obj, form, change):
         if not change:  # If the object is being created
             obj.created_by = request.user
@@ -215,7 +255,6 @@ class StudentAdmin(admin.ModelAdmin):
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         formfield = super().formfield_for_foreignkey(db_field, request, **kwargs)
         if db_field.name == 'location':
-            # Filter locations based on the current user
             formfield.queryset = Location.objects.filter(created_by=request.user)
         return formfield
 
@@ -224,19 +263,49 @@ class StudentAdmin(admin.ModelAdmin):
 
 # class GroupAdmin(admin.ModelAdmin):
 #     list_display = ('name', 'description')  # Example fields
-class Monthly_prizingAdmin(admin.ModelAdmin):
+class MonthlyPlanAdmin(admin.ModelAdmin):
     list_display = ('hours', 'prize', 'discription', 'status')
     list_filter = ('status','hours', 'prize')
     search_fields = ('hours', 'phone_no')
-class PaymentsAdmin(admin.ModelAdmin):
-    list_display = ('booking_to_update', 'prize', 'payment_time')
-    list_filter = ('payment_time', 'prize')
-    search_fields = ('prize',)
 
-admin_site.register(Payments,PaymentsAdmin)
-admin_site.register(Monthly_prizing,Monthly_prizingAdmin)
+    def get_queryset(self, request):
+        # Only show objects created by the current user
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(created_by=request.user)
+    
+    def save_model(self, request, obj, form, change):
+        if not change:  # If the object is being created
+            # obj.seat_no = Seat.objects.filter(location=obj.location).count()+ 1
+            # print("hello here is seat no" ,obj.seat_no)
+            obj.created_by = request.user
+        obj.save()
+class PaymentsAdmin(admin.ModelAdmin):
+    list_display = ('booking', 'amount','paid_amount','discount','payment_time')
+    list_filter = ('booking','paid_amount',)
+    search_fields = ('payment_time',)
+    def get_queryset(self, request):
+        # Only show objects created by the current user
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(created_by=request.user)
+    
+    def save_model(self, request, obj, form, change):
+        if not change:  # If the object is being created
+            # obj.seat_no = Seat.objects.filter(location=obj.location).count()+ 1
+            # print("hello here is seat no" ,obj.seat_no)
+            obj.created_by = request.user
+        obj.save()
+
+admin_site.register(Payment,PaymentsAdmin)
+admin_site.register(MonthlyPlan,MonthlyPlanAdmin)
 admin_site.register(Seat,SeatAdmin)
 admin_site.register(Location,LocationAdmin)
 admin_site.register(Booking,BookingAdmin)
 admin_site.register(Student,StudentAdmin)
+from admin_interface.models import Theme
+# from django.contrib import admin
 
+admin_site.register(Theme)
