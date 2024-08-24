@@ -1,5 +1,5 @@
 {% extends "admin/base_site.html" %}
-
+{% load static %}
 {% block extrahead %}
     {{ block.super }}
 
@@ -20,3 +20,13 @@
         // Initialize Select2 on the element with ID `id_student` when the document is ready
     </script>
 {% endblock %}
+
+{% block branding %}
+    <h1 id="site-name">
+        <a href="{% url 'admin:index' %}">
+            <img src="{% static 'booking/images/StudySphere.png' %}" alt="Your Logo" style="max-height: 50px;">
+            StudySphere Library Manger
+        </a>
+    </h1>
+{% endblock %}
+

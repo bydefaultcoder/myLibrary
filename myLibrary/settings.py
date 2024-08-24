@@ -30,7 +30,12 @@ DATABASE_URL = os.getenv('DATABASE_URL')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG') == 'True'
 
-ALLOWED_HOSTS = ['*']
+
+import socket
+hostname = socket.gethostname()
+IPAddr = socket.gethostbyname(hostname)
+print(IPAddr)
+ALLOWED_HOSTS = ["*",IPAddr]
 
 
 # Application definition
@@ -39,7 +44,6 @@ INSTALLED_APPS = [
 
     # 'jazzmin',
     # 'grappelli',
-
     "admin_interface",
     'django.contrib.admin',
     'corsheaders',
@@ -50,12 +54,34 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # 'admin_reorder',
     # 'django_group_model',
 
     'customAdmin',
     'booking',
 ]
+ADMIN_REORDER = (
+    # Keep original label and models
+    # 'sites',
 
+    # # Rename app
+    {'app': 'Booking', 'label': 'Authorisation'},
+
+    # # Reorder app models
+    # {'app': 'auth', 'models': ('auth.User', 'auth.Group')},
+
+    # # Exclude models
+    # {'app': 'auth', 'models': ('auth.User', )},
+
+    # # Cross-linked models
+    # {'app': 'auth', 'models': ('auth.User', 'sites.Site')},
+
+    # # models with custom name
+    # {'app': 'auth', 'models': (
+    #     'auth.Group',
+    #     {'model': 'auth.User', 'label': 'Staff'},
+    # )},
+)
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_METHODS = [
     "GET",
@@ -78,6 +104,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'customAdmin.expirymiddleware.CheckUserExpiryMiddleware',
+    #  'admin_reorder.middleware.ModelAdminReorder',
 ]
 TEMPLATES = os.path.join(BASE_DIR,"templates")
 print(TEMPLATES)
@@ -105,19 +132,25 @@ WSGI_APPLICATION = 'myLibrary.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 os.getenv('DATABASE_URL')
-DATABASES = {  
-    'default': {  
-        'ENGINE': 'django.db.backends.mysql',  
-        'NAME': os.getenv('DATABASE_NAME'),  
-        'USER': os.getenv('DATABASE_USER'),  
-        'PASSWORD': os.getenv('DATABASE_PASSWORD'),  
-        'HOST': os.getenv('DATABASE_HOST'),  
-        'PORT': os.getenv('DATABASE_PORT'),
-        'OPTIONS': {  
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"  
-        }  
-    }  
-}  
+# DATABASES = {  
+#     'default': {  
+#         'ENGINE': 'django.db.backends.mysql',  
+#         'NAME': os.getenv('DATABASE_NAME'),  
+#         'USER': os.getenv('DATABASE_USER'),  
+#         'PASSWORD': os.getenv('DATABASE_PASSWORD'),  
+#         'HOST': os.getenv('DATABASE_HOST'),  
+#         'PORT': os.getenv('DATABASE_PORT'),
+#         'OPTIONS': {  
+#             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"  
+#         }  
+#     }  
+# }  
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 
 
 # Password validation
