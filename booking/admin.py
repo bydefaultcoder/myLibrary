@@ -65,7 +65,7 @@ class BookingAdmin(admin.ModelAdmin):
                    return "Expiring today"
                else:
                    return f"{days_remain.days} days to expire"
-        return f'Start from {objects.latest('pk').joining_date+relativedelta(day=0).}'
+        return f'Start from {objects.latest('pk').joining_date+relativedelta(day=0)}'
     
     def convertToReadableTimeing(self,time_str):
         t = int(time_str.split(":")[0])
