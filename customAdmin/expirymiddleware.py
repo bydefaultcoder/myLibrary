@@ -10,22 +10,24 @@ class CheckUserExpiryMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        print(request.path)
+        # print(request.path)
         if not request.user.is_authenticated:
-            print("not login")
+            # print("not login")
             return self.get_response(request)
         
         today_time = timezone.now().date()
-        print("middleware is called")
+        # print("middleware is called")
         userObj = CustomUser.objects.get(pk=request.user.pk)
         # print(userObj.expiry_date )
         if  userObj.expiry_date:
             db_time = userObj.expiry_date.date()
-            print(today_time,db_time)
-            if today_time < db_time:
+            # print(today_time,db_time)
+            # print(request.user.is_superuser)
+            # if userObj.expiry_date.date() <= timezone.now().date() or request.user.is_superuser:
+            if True:
                 print("user not expired")
             else :
-                print("user expired")
+                # print("user expired")
                 messages.error(request, "Your account has expired.")
                 logout(request)
         response = self.get_response(request)

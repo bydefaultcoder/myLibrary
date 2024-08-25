@@ -53,7 +53,7 @@ class BookingAdmin(admin.ModelAdmin):
 
     def days_to_expire(self,modelObject):
         objects  = Payment.objects.filter(booking=modelObject.pk)
-        currentMonthObj = None
+        # currentMonthObj = None
         for obj in objects:
             print(obj.joining_date,obj.remain_no_of_months)
             commingdate = obj.joining_date + relativedelta(months=obj.remain_no_of_months)
@@ -65,9 +65,7 @@ class BookingAdmin(admin.ModelAdmin):
                    return "Expiring today"
                else:
                    return f"{days_remain.days} days to expire"
-               currentMonthObj = obj
-        print(objects)
-        return ""
+        return f'Start from {objects.latest('pk').joining_date+relativedelta(day=0).}'
     
     def convertToReadableTimeing(self,time_str):
         t = int(time_str.split(":")[0])
@@ -149,6 +147,7 @@ class BookingAdmin(admin.ModelAdmin):
             obj.plan = form.cleaned_data.get('plan')
             obj.total_amount = form.cleaned_data.get('total_amount')
             obj.remain_no_of_months = form.cleaned_data.get('remain_no_of_months')
+            # print(tz.datetime(form.cleaned_data.get('joining_date')))
             obj.joining_date = form.cleaned_data.get('joining_date')
             logger.info(msg=f"{obj} hello line no 63")
             if not change:
@@ -257,6 +256,26 @@ class StudentAdmin(admin.ModelAdmin):
         if db_field.name == 'location':
             formfield.queryset = Location.objects.filter(created_by=request.user)
         return formfield
+    
+    def days_to_expire(self,modelObject):
+        booking  = Booking.objects.filter(student = modelObject.pk).latest("pk")
+        if  booking != None:
+            objects  = Payment.objects.filter(booking=booking.pk)
+            print(object.query)
+            # currentMonthObj = None
+            for obj in objects:
+                print(obj.joining_date,obj.remain_no_of_months)
+                commingdate = obj.joining_date + relativedelta(months=obj.remain_no_of_months)
+                days_remain = commingdate - tz.now().date()
+                if obj.joining_date <= tz.now().date():
+                    if  days_remain.days <0:
+                        return "Expired"
+                    elif days_remain.days ==0:
+                        return "Expiring today"
+                    else:
+                        return f"{days_remain.days} days to expire"
+        else:
+            "Seat not alloted"
 
 # Re-register UserAdmin
 # admin_site.unregister(User)

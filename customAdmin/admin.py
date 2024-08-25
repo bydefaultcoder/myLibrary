@@ -31,6 +31,7 @@ class MyLibraryAdminSite(AdminSite):
         """
         # Get the default app list
         app_list = super().get_app_list(request)
+        # print(app_list)
 
         # Define the custom order of apps (by name)
         custom_app_order = ['Authentication and Authorization', 'Booking', 'Customadmin']

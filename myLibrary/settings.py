@@ -54,9 +54,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # 'admin_reorder',
     # 'django_group_model',
 
+    # 'admin_reorder',
     'customAdmin',
     'booking',
 ]
@@ -64,14 +64,24 @@ ADMIN_REORDER = (
     # Keep original label and models
     # 'sites',
 
+    {'app': 'booking', 'models': ({'model':'booking.Location','label':"Libraies"}, 'booking.Seat', 'booking.Student', 'booking.MonthlyPlan','booking.Payment','booking.theme')},
     # # Rename app
-    {'app': 'Booking', 'label': 'Authorisation'},
+    # {'app': 'booking', 'label': 'Management'},
+
 
     # # Reorder app models
-    # {'app': 'auth', 'models': ('auth.User', 'auth.Group')},
+
+    # {'app': 'customAdmin', 'label': "Handle User"},
+
+    # {'app': 'admin_interface', 'label': 'Theme selector',},
+
+    # {'app': 'auth', 'label': 'Group'},
+   
+    # {'app': 'admin_intrface', 'models': ('auth.Groups','customAdmin.Users')},
+
+    # {'app': 'admin_intrface', 'models': ('admin_intrface.theme','auth.Groups')},
 
     # # Exclude models
-    # {'app': 'auth', 'models': ('auth.User', )},
 
     # # Cross-linked models
     # {'app': 'auth', 'models': ('auth.User', 'sites.Site')},
@@ -100,11 +110,11 @@ MIDDLEWARE = [
      'django.middleware.locale.LocaleMiddleware', 
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    #  'admin_reorder.middleware.ModelAdminReorder',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'customAdmin.expirymiddleware.CheckUserExpiryMiddleware',
-    #  'admin_reorder.middleware.ModelAdminReorder',
 ]
 TEMPLATES = os.path.join(BASE_DIR,"templates")
 print(TEMPLATES)
