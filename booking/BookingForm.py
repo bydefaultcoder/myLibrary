@@ -19,7 +19,7 @@ class CustomBookingForm(forms.ModelForm):
     end_time = forms.ChoiceField(choices=HOUR_CHOICES, label="End Time")
     # hour_duratios =  [(0,'Custom Time')] + [(i,i) for i in [4,6,8,12,24]]
 
-    joining_date = forms.DateField(initial=tz.now())
+    joining_date = forms.DateField(initial=tz.now(),widget=forms.DateInput(attrs={'type': 'date'}))
     remain_no_of_months = forms.IntegerField(min_value=1,initial=0)
     
     plan = forms.ChoiceField(choices= [],label="Plans",)
@@ -29,7 +29,7 @@ class CustomBookingForm(forms.ModelForm):
     # student = forms.ModelChoiceField(queryset=Student.objects.all(), required=False, label='student')
     class Meta:
         model = Booking
-        fields = ['student', 'location', 'seat', 'plan','start_time', 'end_time','remain_no_of_months','discount','joining_date' ]
+        fields = ['student', 'location','joining_date', 'seat', 'plan','start_time', 'end_time','remain_no_of_months','discount', ]
 
     def get_monthly_plans(self):
        

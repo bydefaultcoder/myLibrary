@@ -137,7 +137,7 @@ class Booking(models.Model):
     remain_no_of_months = None
     start_time = models.TimeField()
     end_time = models.TimeField()
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active',blank=False,null=False)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active',blank=False,null=False,editable=False)
     duration = models.DurationField( default=tz.timedelta(days=30))
     created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True,editable=False)
     class Meta:
@@ -224,7 +224,8 @@ class MonthlyPlan(models.Model):
 
 class Payment(models.Model):
     payment_id = models.AutoField(primary_key=True, verbose_name="Location No")
-    booking = models.ForeignKey(Booking, on_delete=models.CASCADE)
+    
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE,related_name='payments')
     amount = models.DecimalField( decimal_places=2,max_digits=6,verbose_name='Amount (₹)',validators=[MinValueValidator(1)])
     paid_amount = models.DecimalField( decimal_places=2,max_digits=6,verbose_name='Paid Amount (₹)',validators=[MinValueValidator(1)])
     discount = models.DecimalField(decimal_places=2,max_digits=6,verbose_name='Discount (in %)',validators=[MinValueValidator(100)])
