@@ -85,7 +85,8 @@
                 $.ajax({
                     url: '/admin/booking/get_timming_by_seat/',  // URL to fetch seats
                     data: {
-                        'seat_id': SeatId
+                        'seat_id': SeatId,
+                        'joining_date':$('#id_joining_date').val()
                     },
                     success: function(data) {
                         console.log(data)

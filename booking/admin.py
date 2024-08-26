@@ -65,7 +65,9 @@ class BookingAdmin(admin.ModelAdmin):
                    return "Expiring today"
                else:
                    return f"{days_remain.days} days to expire"
-        return f'Start from {objects.latest('pk').joining_date+relativedelta(day=0)}'
+        # commingdate = objects.latest('pk').joining_date + relativedelta(months=0)
+        rem_day = objects.latest('pk').joining_date - tz.now().date() 
+        return f'{rem_day.days} days to join (for {obj.remain_no_of_months} month)'
     
     def convertToReadableTimeing(self,time_str):
         t = int(time_str.split(":")[0])
@@ -101,7 +103,7 @@ class BookingAdmin(admin.ModelAdmin):
         return modelObject.student.name
 
     def Seat_no(self,modelObject):
-        return modelObject.seat.seat_id
+        return modelObject.seat.seat_no
     
     @transaction.atomic
     def custom_bulk_delete(self, request, queryset):

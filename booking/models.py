@@ -25,8 +25,8 @@ class Location(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
     created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL ,null= True,blank=False,editable=False)
     class Meta:
-        verbose_name = "Location"          # Singular form
-        verbose_name_plural = "Locations"  # Plural form
+        verbose_name = "library"          # Singular form
+        verbose_name_plural = "libraries"  # Plural form
 
     def __str__(self):
         return f'{self.location_name}-{self.location_id}'

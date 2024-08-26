@@ -32,6 +32,7 @@ class CustomBookingForm(forms.ModelForm):
         fields = ['student', 'location', 'seat', 'plan','start_time', 'end_time','remain_no_of_months','discount','joining_date' ]
 
     def get_monthly_plans(self):
+       
        plans = MonthlyPlan.objects.filter(created_by=self.request.user)
        plans_to_return = []
        for i in plans:
@@ -66,7 +67,19 @@ class CustomBookingForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         print(cleaned_data,"come heredm,.jsdklfjlsadk;")
+        # cleaned_data
         logging.debug("clean data",cleaned_data)
         return cleaned_data
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        
+        # Only allow updates to specific fields
+        if obj:  # obj will be None when creating a new object
+            form.base_fields = {
+                key: form.base_fields[key] 
+                for key in ['start_time']  # Specify fields you want to allow
+            }
+        
+        return form
 
 
