@@ -24,7 +24,7 @@ urlpatterns = [
     path('admin/booking/get_seats_by_location/', get_seats_by_location, name='get_seats_by_location'),
     path('admin/booking/get_timming_by_seat/', get_seat_available_timing, name='get_timming_by_seat'),
     path('admin/booking/get_mothlyplans_by_user/', get_mothlyplans_by_user, name='get_mothlyplans_by_user'),
-    path('/', admin_site.urls),
+    path('admin/', admin_site.urls),
     
     # path('dj-admin/', admin.site.urls),
     # path('booking/', include('booking.urls')),

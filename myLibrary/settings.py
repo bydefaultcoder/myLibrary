@@ -29,8 +29,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "876767hvvb^%&^$&BT&UJVJGYT%UUTGHF^%$hgfyt655rfgr65rf"
 DATABASE_URL = os.getenv('DATABASE_URL')
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG') == 'True'
-# DEBUG = True
+# DEBUG = os.getenv('DEBUG') == 'True'
+DEBUG = True
 
 
 import socket
