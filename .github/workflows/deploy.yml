@@ -8,6 +8,7 @@ on:
     branches:
       - master
 
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -38,6 +39,8 @@ jobs:
     steps:
       - name: Deploy to Server
         run: |
+	        echo "$SSH_PRIVATE_KEY" > key.pem
+          chmod 600 key.pem
           ssh root@157.173.221.214 "cd /home/applications/myLibrary && git pull origin master && ./deploy.sh"
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
