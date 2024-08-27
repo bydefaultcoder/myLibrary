@@ -27,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECRET_KEY = os.getenv('SECRET_KEY')
 SECRET_KEY = "876767hvvb^%&^$&BT&UJVJGYT%UUTGHF^%$hgfyt655rfgr65rf"
-DATABASE_URL = os.getenv('DATABASE_URL')
+# DATABASE_URL = os.getenv('DATABASE_URL')
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = os.getenv('DEBUG') == 'True'
 DEBUG = True
@@ -158,6 +158,19 @@ os.getenv('DATABASE_URL')
 #         }  
 #     }  
 # }  
+DATABASES = {  
+    'default': {  
+        'ENGINE': 'django.db.backends.mysql',  
+        'NAME': 'library_manager',  
+        'USER': 'samar',  
+        'PASSWORD': 'Samar@65535101',  
+        'HOST': 'localhost',  
+        'PORT': 3306,
+        'OPTIONS': {  
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"  
+        }  
+    }  
+}  
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
