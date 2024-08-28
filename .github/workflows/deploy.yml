@@ -36,8 +36,8 @@ jobs:
     steps:
       - name: Deploy to Server
         run: |
-          SSH_PRIVATE_KEY=$(cat /home/myLibraryprojectuser/.ssh/id_ed25519)
-          chmod 600 /home/myLibraryprojectuser/.ssh/id_ed25519
-          ssh -i /home/myLibraryprojectuser/.ssh/id_ed25519 -o StrictHostKeyChecking=no myLibraryprojectuser@157.173.221.214 "cd /home/applications/myLibrary && git pull origin master && ./deploy.sh"
+          echo "${{ secrets.myLibraryprojectuser }}" > key.pem
+          chmod 600 key.pem
+          ssh -o StrictHostKeyChecking=no -i key.pem myLibraryprojectuser@157.173.221.214 "cd /home/applications/myLibrary && git pull origin master && ./deploy.sh"
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_PRIVATE_KEY: ${{ secrets.myLibraryprojectuser }}
