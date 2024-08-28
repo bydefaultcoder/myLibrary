@@ -38,6 +38,6 @@ jobs:
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > key.pem
           chmod 600 key.pem
-          ssh -o StrictHostKeyChecking=no -i key.pem myLibraryprojectuser@157.173.221.214 "cd /home/applications/myLibrary && git pull origin master && ./deploy.sh"
+          ssh -i key.pem -o StrictHostKeyChecking=no myLibraryprojectuser@157.173.221.214 "cd /home/applications/myLibrary && git pull origin master && ./deploy.sh"
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
