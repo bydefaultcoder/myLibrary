@@ -162,7 +162,7 @@ DATABASES = {
     'default': {  
         'ENGINE': 'django.db.backends.mysql',  
         'NAME': 'library_manager',  
-        'USER': 'root',  
+        'USER': 'samar',  
         'PASSWORD': 'Samar@65535101',  
         'HOST': 'localhost',  
         'PORT': 3306,
@@ -171,12 +171,12 @@ DATABASES = {
         }  
     }  
 }  
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 # Password validation
