@@ -34,7 +34,7 @@ jobs:
     needs: build
     if: github.ref == 'refs/heads/master'
     steps:
-      - name: Deploy to Server
+      - name: Deployment to Server
         run: |
           echo "${{ secrets.myLibraryprojectuser }}" > key.pem
           chmod 600 key.pem
