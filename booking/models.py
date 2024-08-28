@@ -230,7 +230,7 @@ class Payment(models.Model):
     paid_amount = models.DecimalField( decimal_places=2,max_digits=6,verbose_name='Paid Amount (₹)',validators=[MinValueValidator(1)])
     discount = models.DecimalField(decimal_places=2,max_digits=6,verbose_name='Discount (in %)',validators=[MinValueValidator(100)])
     payment_time = models.DateTimeField(auto_now_add=True)
-    joining_date = models.DateField(blank=False,null=False, verbose_name="Joining from",default=tz.now())
+    joining_date = models.DateField(blank=False,null=False, verbose_name="Joining from",default=tz.now)
     remain_no_of_months = models.PositiveIntegerField(default=1,verbose_name="No. of Months",validators=[MinValueValidator(1)])
     created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL ,null= True,blank=False,editable=False)
     class Meta:
