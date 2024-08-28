@@ -34,10 +34,10 @@ jobs:
     needs: build
     if: github.ref == 'refs/heads/master'
     steps:
-      - name: Start SSH agent
+      - name: Deploy to Server
         run: |
-          eval $(ssh-agent -s)
-          echo "${{ secrets.myLibraryprojectuser}}" | tr -d '\r' | ssh-add -
-      
-      - name: Deployment to Server
-        run: ssh -o StrictHostKeyChecking=no myLibraryprojectuser@157.173.221.214 "cd /home/applications/myLibrary && git pull origin master && ./deploy.sh"  
+          echo "${{ secrets.key }}" > key.pem
+          chmod 600 key.pem
+          ssh -o StrictHostKeyChecking=no -i key.pem myLibraryprojectuser@157.173.221.214 "cd /home/applications/myLibrary && git pull origin master && ./deploy.sh"
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.key }}"  
