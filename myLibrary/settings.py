@@ -162,7 +162,7 @@ DATABASES = {
     'default': {  
         'ENGINE': 'django.db.backends.mysql',  
         'NAME': 'library_manager',  
-        'USER': 'samar',  
+        'USER': 'root',  
         'PASSWORD': 'Samar@65535101',  
         'HOST': 'localhost',  
         'PORT': 3306,
