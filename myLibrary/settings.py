@@ -173,7 +173,7 @@ else :
             'NAME': 'library_manager',  
             'USER': 'samar',  
             'PASSWORD': 'Samar@65535101',  
-            'HOST': '157.173.221.214',  
+            'HOST': 'localhost',  
             'PORT': 3306,
             'OPTIONS': {  
                 'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"  
