@@ -46,7 +46,7 @@ INSTALLED_APPS = [
 
     'jazzmin',
     # 'grappelli',
-    "admin_interface",
+        # "admin_interface"
     'django.contrib.admin',
     'corsheaders',
     "colorfield",
@@ -63,38 +63,7 @@ INSTALLED_APPS = [
     'customAdmin',
     'booking',
 ]
-ADMIN_REORDER = (
-    # Keep original label and models
-    # 'sites',
 
-    {'app': 'booking', 'models': ({'model':'booking.Location','label':"Libraies"}, 'booking.Seat', 'booking.Student', 'booking.MonthlyPlan','booking.Payment','booking.theme')},
-    # # Rename app
-    # {'app': 'booking', 'label': 'Management'},
-
-
-    # # Reorder app models
-
-    # {'app': 'customAdmin', 'label': "Handle User"},
-
-    # {'app': 'admin_interface', 'label': 'Theme selector',},
-
-    # {'app': 'auth', 'label': 'Group'},
-   
-    # {'app': 'admin_intrface', 'models': ('auth.Groups','customAdmin.Users')},
-
-    # {'app': 'admin_intrface', 'models': ('admin_intrface.theme','auth.Groups')},
-
-    # # Exclude models
-
-    # # Cross-linked models
-    # {'app': 'auth', 'models': ('auth.User', 'sites.Site')},
-
-    # # models with custom name
-    # {'app': 'auth', 'models': (
-    #     'auth.Group',
-    #     {'model': 'auth.User', 'label': 'Staff'},
-    # )},
-)
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_METHODS = [
     "GET",
@@ -160,19 +129,18 @@ os.getenv('DATABASE_URL')
 # }  
 print(os.getenv('DEVLOPMENT'))
 if os.getenv('DEVLOPMENT')=="TRUE":
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+    dbuser = 'root'
+    PASSWORD ='Ra&5_153'
 else :
-    DATABASES = {  
+    dbuser = 'samar'
+    PASSWORD ='Samar@65535101'
+
+DATABASES = {  
         'default': {  
             'ENGINE': 'django.db.backends.mysql',  
             'NAME': 'library_manager',  
-            'USER': 'samar',  
-            'PASSWORD': 'Samar@65535101',  
+            'USER': dbuser,  
+            'PASSWORD': PASSWORD,  
             'HOST': 'localhost',  
             'PORT': 3306,
             'OPTIONS': {  
@@ -228,17 +196,15 @@ STATICFILES_DIRS=[  STATIC_DIR,   ]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CACHES = {
-#     # ...
-#     "admin_interface": {
-#         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-#         "TIMEOUT": 60 * 5,
-#     },
-#     # ...
-# }
 
 AUTH_USER_MODEL = 'customAdmin.CustomUser'
-# JAZZMIN_SETTINGS = jazzmin_setting
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
 SILENCED_SYSTEM_CHECKS = ["security.W019"]
+
+
+from .jazzmin_settings import ui_settings,ui_tweaks_setting
+JAZZMIN_SETTINGS = ui_settings
+
+
+JAZZMIN_UI_TWEAKS = ui_tweaks_setting

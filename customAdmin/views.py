@@ -2,7 +2,9 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpRequest, HttpResponseBadRequest,HttpResponseRedirect
+from django.contrib.admin.views.decorators import staff_member_required
 # Create your views here.
 
 def admin_login(request:HttpRequest):
@@ -30,5 +32,6 @@ def admin_login(request:HttpRequest):
     except Exception as e:
         print(e)
         return HttpResponse('Server Error')
-
-
+@staff_member_required
+def profile(request:HttpRequest):
+    return render(request,'admin/profile.html')

@@ -7,7 +7,13 @@ from django.contrib.auth.admin import UserAdmin
 from .customAdminForm import CustomUserCreationForm
 from .models import CustomUser 
 from django.contrib.auth.hashers import check_password
+from django.utils.html import format_html
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+
+from django.contrib.admin.models import LogEntry
+from django.utils.timezone import now
+from datetime import timedelta
+
 class MyLibraryAdminSite(AdminSite):
     # Text to put at the end of each page's <title>.
     site_title = _('My site admin')
@@ -17,54 +23,46 @@ class MyLibraryAdminSite(AdminSite):
 
     # Text to put at the top of the admin index page.
     index_title = _('Site administration')
+    
 
     def each_context(self, request):
         context = super().each_context(request)
-        context['site_title'] = str(request.user)
-        context['site_header'] = str(request.user)
+        context['site_title'] = _(str(request.user))
+        # if request.user.:
+            # context['site_header'] = _(str(request.user.fullname))
         # self.
         return context
+        
+    def index(self, request, extra_context=None):
+        # Use the custom user model to filter actions by the logged-in user
+        recent_actions = LogEntry.objects.filter(
+            user=request.user,  # request.user will be an instance of CustomUser
+            action_time__gte=now() - timedelta(days=7)  # Adjust the time range as needed
+        ).select_related('content_type')[:10]  # Limiting to the last 10 actions
 
-    def get_app_list(self, request):
-        """
-        Return a custom ordered list of apps and their models.
-        """
-        # Get the default app list
-        app_list = super().get_app_list(request)
-        # print(app_list)
+        extra_context = extra_context or {}
+        extra_context['recent_actions'] = recent_actions
+        return super().index(request, extra_context=extra_context)
 
-        # Define the custom order of apps (by name)
-        custom_app_order = ['Authentication and Authorization', 'Booking', 'Customadmin']
+ 
 
-        # Define the custom order of models for each app
-        custom_model_order = {
-            'Authentication and Authorization': ['Groups', 'SecondModel'],
-            'Customadmin': ['Users'],
-            'Booking': ['Locations','Seats','Students','Bookings', 'Paymentss'],
-        }
-
-        # Sort the app list based on the custom app order
-        app_list = sorted(app_list, key=lambda x: custom_app_order.index(x['name']) if x['name'] in custom_app_order else len(custom_app_order))
-
-        # Sort models within each app based on custom model order
-        for app in app_list:
-            app_name = app['name']
-            if app_name in custom_model_order:
-                # Sort models within this app based on custom model order
-                app['models'] = sorted(app['models'], key=lambda x: custom_model_order[app_name].index(x['object_name']) if x['object_name'] in custom_model_order[app_name] else len(custom_model_order[app_name]))
-
-        return app_list
     
     
 class CustomUserAdmin(BaseUserAdmin):
     add_form = CustomUserCreationForm  # Use custom form for adding users
     model = CustomUser
-    list_display = ('email', 'is_staff', 'is_superuser', 'is_active')
+    list_display = ('username','fullname', 'email','image_tag', 'is_staff', 'is_superuser', 'is_active')
     search_fields = ('email',)
     ordering = ('username',)
 
-    fieldsets = (
-        (None, {'fields': ('email', 'username','password','library_name','library_address','expiry_date')}),
+    def image_tag(self, obj):
+        if obj.avatar:
+            return format_html('<img src="{}" style="max-width:100px; max-height:100px"/>'.format(obj.avatar.url))
+
+    image_tag.short_description = 'Image'
+
+    fieldsets = (   
+        (None, {'fields': ('email', 'username','fullname','avatar','password','library_name','address','expiry_date')}),
         ('Permissions', {'fields': ('is_staff', 'is_active', 'is_superuser', 'groups', 'user_permissions')}),
         # ('Important dates', {'fields': ('last_login',)}),
     )
@@ -72,7 +70,7 @@ class CustomUserAdmin(BaseUserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email','username', 'password1', 'password2', 'is_staff', 'is_superuser', 'is_active'),
+            'fields': ('email','username','fullname','avatar', 'password1', 'password2', 'is_staff', 'is_superuser', 'is_active'),
         }),
     )
     filter_horizontal = ('groups', 'user_permissions')  # Enable horizontal filtering for groups and permissions

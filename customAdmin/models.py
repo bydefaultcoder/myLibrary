@@ -1,3 +1,4 @@
+import os
 from typing import Iterable
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, PermissionsMixin
@@ -8,6 +9,7 @@ from django.contrib.auth.models import AbstractUser
 # from django_group_model.models import AbstractGroup
 # AbstractGroup
 from django.db import models
+
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -26,23 +28,34 @@ class CustomUserManager(BaseUserManager):
 
 
 class CustomUser(AbstractUser,PermissionsMixin):
+    
+    def user_avatar_upload_to(instance, filename):
+    # Ensure the user ID is available
+        user_id = instance.pk
+        ext = os.path.splitext(filename)[1]  # Get file extension (e.g., .jpg or .png)
+        
+        # Construct the new filename
+        new_filename = f'{user_id}{ext}'
+        
+        # Return the full path to the file
+        print(new_filename)
+        return os.path.join('static/avatars', new_filename)
     email = models.EmailField(unique=True)
     username = models.CharField(blank=False,null=False,max_length=200,unique=True)
+    fullname = models.CharField(blank=False,null=False,max_length=200,default="not taken")
     library_name = models.CharField(blank=True,null=True,max_length=200)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     expiry_date = models.DateTimeField(blank=True,null=True)
+    avatar = models.ImageField(upload_to=user_avatar_upload_to, blank=True, null=True)
     # birthdate = models.DateField(null=True, blank=True)
-    library_address = models.TextField(max_length=500, blank=True)
+    address = models.TextField(max_length=500, blank=True)
     # location = models.CharField(max_length=30, blank=True)
     # Add other fields here
-
     objects = CustomUserManager()
-
         # USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = [ 'email']
-    
 
     def save(self, *args, **kwargs) -> None:
         if not self.pk :

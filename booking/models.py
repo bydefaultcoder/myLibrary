@@ -1,3 +1,4 @@
+import os
 from typing import Any
 from django.db import models
 from django.db import models
@@ -93,6 +94,17 @@ class Student(models.Model):
         ('alloted', 'Alloted'),
         ('suspended', 'Suspended'),
     ]
+    def user_avatar_upload_to(instance, filename):
+    # Ensure the user ID is available
+        user_id = instance.pk
+        ext = os.path.splitext(filename)[1]  # Get file extension (e.g., .jpg or .png)
+        
+        # Construct the new filename
+        new_filename = f'{user_id}{ext}'
+        
+        # Return the full path to the file
+        print(new_filename)
+        return os.path.join('static/student/avatars', new_filename)
     stu_no = models.PositiveIntegerField(blank=True,null=True,editable=False)
     name = models.CharField(max_length=100)
     phone_no = models.CharField(max_length=10,validators=[MaxLengthValidator(10),MinLengthValidator(10)])
@@ -100,6 +112,7 @@ class Student(models.Model):
     adhar_no = models.CharField(max_length=12, unique=True,validators=[MaxLengthValidator(12),MinLengthValidator(12)])
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
     created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True,editable=False)
+    avatar = models.ImageField(upload_to=user_avatar_upload_to, blank=True, null=True)
     class Meta:
         verbose_name = "Student"          # Singular form
         verbose_name_plural = "Students"  # Plural form

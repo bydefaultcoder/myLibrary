@@ -50,14 +50,14 @@ def cancel_booking(request, booking_id):
         messages.error(request, 'Booking is already canceled or invalid.')
 
     return redirect('index')
-
+@login_required
 def get_seats_by_location(request):
     location_id = request.GET.get('location_id')
     print(Location.objects.filter(location_id=location_id)[0])
     seats = Seat.objects.filter(location_id=location_id, created_by = request.user)
     seat_dict = {seat.pk: f"seatNo:{seat.seat_no}" for seat in seats}
     return JsonResponse(seat_dict)
-
+@login_required
 def get_seat_available_timing(request):
     """
     API view to get available hours for a specific seat based on already booked slots.
@@ -133,7 +133,7 @@ def _filter_available_hours(seat,joining_date):
 #     print(available_choices)
 
 #     return {"data":available_choices}
-
+@login_required
 def get_mothlyplans_by_user(request):
     """
     API view to get available hours for a specific seat based on already booked slots.

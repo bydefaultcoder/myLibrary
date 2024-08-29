@@ -326,7 +326,7 @@ admin_site.register(Seat,SeatAdmin)
 admin_site.register(Location,LocationAdmin)
 admin_site.register(Booking,BookingAdmin)
 admin_site.register(Student,StudentAdmin)
-from admin_interface.models import Theme
+# from admin_interface.models import Theme
 # from django.contrib import admin
 
-admin_site.register(Theme)
+# admin_site.register(Theme)
