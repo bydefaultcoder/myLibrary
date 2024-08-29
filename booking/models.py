@@ -6,7 +6,7 @@ from django.db import transaction
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone as tz
-from django.core.validators import MinValueValidator,MaxValueValidator
+from django.core.validators import MinValueValidator,MaxLengthValidator,MinLengthValidator
 
 
 from customAdmin.models import CustomUser
@@ -95,9 +95,9 @@ class Student(models.Model):
     ]
     stu_no = models.PositiveIntegerField(blank=True,null=True,editable=False)
     name = models.CharField(max_length=100)
-    phone_no = models.CharField(max_length=15)
+    phone_no = models.CharField(max_length=10,validators=[MaxLengthValidator(10),MinLengthValidator(10)])
     address = models.TextField()
-    adhar_no = models.CharField(max_length=12, unique=True)
+    adhar_no = models.CharField(max_length=12, unique=True,validators=[MaxLengthValidator(12),MinLengthValidator(12)])
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
     created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True,editable=False)
     class Meta:

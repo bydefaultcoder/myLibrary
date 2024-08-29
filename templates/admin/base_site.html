@@ -1,24 +1,24 @@
 {% extends "admin/base_site.html" %}
 {% load static %}
 {% block extrahead %}
-    {{ block.super }}
-
-    <!-- Include jQuery (if not already included by admin/base_site.html) -->
+{{ block.super }}
+<!-- Include jQuery (if not already included by admin/base_site.html) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <!-- Include Select2 CSS (if not already included by admin/base_site.html) -->
+<!-- Include Select2 CSS (if not already included by admin/base_site.html) -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.2/dist/css/select2.min.css" rel="stylesheet" />
 
-    <!-- Include Select2 JS -->
+<!-- Include Select2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.2/dist/js/select2.min.js"></script>
 
-    <!-- Custom JavaScript -->
+<!-- Custom JavaScript -->
     <script type="text/javascript">
-        // Set the current user PK in the global window object
-        // window.currentUserPK = "{{ request.user.pk }}";
-
-        // Initialize Select2 on the element with ID `id_student` when the document is ready
+    // Set the current user PK in the global window object
+    // window.currentUserPK = "{{ request.user.pk }}";
+    
+    // Initialize Select2 on the element with ID `id_student` when the document is ready
     </script>
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/custom.css' %}">
 {% endblock %}
 
 {% block branding %}
@@ -29,4 +29,3 @@
         </a>
     </h1>
 {% endblock %}
-
