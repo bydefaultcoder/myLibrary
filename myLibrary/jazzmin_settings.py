@@ -2,7 +2,7 @@ ui_settings = {
     "site_title": "StudySphere Libray Manager",
     "site_header": "StudySphere",
     "site_brand": "StudySphere",
-    "site_logo": "booking/images/StudySphere2.png",
+    "site_logo": "booking/images/StudySpherenew.png",
     # "site_logo": "booking/images/logo2.png",
     # for login
     "welcome_sign": "Welcome to the StudySphere Library Manager",
