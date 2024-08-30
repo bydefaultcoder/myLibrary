@@ -206,7 +206,7 @@ class SeatAdmin(admin.ModelAdmin):
             # duration = end_time - start_time
             return f'{start_time} - {end_time}'
         else:
-            return 'no booking'
+            return '--'
         # return '333'
 
     def get_queryset(self, request):

@@ -45,12 +45,11 @@
         // Listen for changes on the location dropdown
         // $('#id_location').on('select2:select',function() {
         $('#id_location').on('change',function() {
-            console.log("hello for location")
             var locationId = $(this).val();  // Get selected location ID
             if (locationId) {
                 // Clear the seat dropdown
                 seatDropdown.empty();
-
+                console.log("hello for location")
                 // Fetch seats associated with the selected location
                 $.ajax({
                     url: '/admin/booking/get_seats_by_location/',  // URL to fetch seats

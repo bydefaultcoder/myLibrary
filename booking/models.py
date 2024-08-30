@@ -104,7 +104,7 @@ class Student(models.Model):
         
         # Return the full path to the file
         print(new_filename)
-        return os.path.join('static/student/avatars', new_filename)
+        return os.path.join('student/avatars', new_filename)
     stu_no = models.PositiveIntegerField(blank=True,null=True,editable=False)
     name = models.CharField(max_length=100)
     phone_no = models.CharField(max_length=10,validators=[MaxLengthValidator(10),MinLengthValidator(10)])

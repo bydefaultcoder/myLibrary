@@ -1,11 +1,10 @@
 ui_settings = {
-    "site_title": "StudySphere Libray Manager",
-    "site_header": "StudySphere",
-    "site_brand": "StudySphere",
-    # "site_logo": "booking/images/StudySphere.png",
-    "site_logo": "logo/pustakshala.png",
+    "site_title": "Pathshala Libray Manager",
+    "site_header": "pathshala",
+    "site_brand": "Pathshala",
+    "site_logo": "logo/pathshala.png",
     # for login
-    "welcome_sign": "Welcome to the StudySphere Library Manager",
+    "welcome_sign": "Welcome to the Pathshala Library Manager",
 
     # Samartech PVT LTD
     "copyright": "Acme Library Ltd",

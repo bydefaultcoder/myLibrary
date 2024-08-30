@@ -15,10 +15,14 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include,re_path
+from django.urls import path, include,re_path, include
 from booking.views import get_seats_by_location,get_seat_available_timing,get_mothlyplans_by_user
 from customAdmin import admin, views
 from customAdmin.admin import admin_site
+
+
+from django.conf.urls.static import static
+from django.conf import settings 
 urlpatterns = [
     # path('grappelli/', include('grappelli.urls')), # grappelli URLS
     re_path(r'^i18n/', include('django.conf.urls.i18n')),
@@ -30,4 +34,4 @@ urlpatterns = [
     
     # path('dj-admin/', admin.site.urls),
     # path('booking/', include('booking.urls')),
-]
+]+ static(settings.STATIC_URL, document_root=settings.STATIC_DIR)+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

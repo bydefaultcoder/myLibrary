@@ -38,7 +38,7 @@ class CustomUser(AbstractUser,PermissionsMixin):
         
         # Return the full path to the file
         print(new_filename)
-        return os.path.join('static/avatars', new_filename)
+        return os.path.join('avatars', new_filename)
     avatar = models.ImageField(upload_to=user_avatar_upload_to, blank=True, null=True)
 
     email = models.EmailField(unique=True)
