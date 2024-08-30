@@ -11,12 +11,23 @@ ui_settings = {
      "user_avatar": 'avatar',
     "order_with_respect_to": ["booking.Location","booking.Seat",'booking.MonthlyPlan','booking.Student','booking.Payment'],
 
-    "language_chooser": True,
+    # "language_chooser": True,
     "show_ui_builder" : True,
     "show_ui_builder":True,
     "usermenu_links": [
         {"name": "Profile", "url": "/admin/customer-profile", "new_window": True},
     ],
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "booking.Location": "fas fa-building",
+        "booking.Seat": "fas fa-sharp fa-solid fa-chair",
+        # "booking.MonthlyPlan": "fas icon-suitcase",
+        'booking.Student':"fas fa-user",
+        'booking.Payment':"fas fa-money-bill",
+        "booking.booking":"fas  fa-check"
+    },
 
 }
 
