@@ -16,7 +16,7 @@ ui_settings = {
     "show_ui_builder" : True,
     "show_ui_builder":True,
     "usermenu_links": [
-        {"name": "Profile", "url": "/user-profile", "new_window": True},
+        {"name": "Profile", "url": "/admin/customer-profile", "new_window": True},
     ],
 
 }

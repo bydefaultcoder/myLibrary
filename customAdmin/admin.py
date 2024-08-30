@@ -2,6 +2,7 @@ from django.contrib import admin
 
 # Register your models here.
 from django.contrib.admin import AdminSite
+from django.shortcuts import render
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.admin import UserAdmin
 from .customAdminForm import CustomUserCreationForm
@@ -9,10 +10,18 @@ from .models import CustomUser
 from django.contrib.auth.hashers import check_password
 from django.utils.html import format_html
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-
+from django.urls import path
 from django.contrib.admin.models import LogEntry
 from django.utils.timezone import now
 from datetime import timedelta
+
+def custom_dashboard_view(request):
+    return render(request, 'admin/profile.html', {
+        'user': request.user,
+        'site_title': 'User Profile',
+        **admin.site.each_context(request),
+    })
+
 
 class MyLibraryAdminSite(AdminSite):
     # Text to put at the end of each page's <title>.
@@ -43,6 +52,12 @@ class MyLibraryAdminSite(AdminSite):
         extra_context = extra_context or {}
         extra_context['recent_actions'] = recent_actions
         return super().index(request, extra_context=extra_context)
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path('user-profile/', self.admin_view(custom_dashboard_view), name='custom_dashboard'),
+        ]
+        return custom_urls + urls
 
  
 
