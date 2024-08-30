@@ -38,7 +38,9 @@ class CustomUser(AbstractUser,PermissionsMixin):
         
         # Return the full path to the file
         print(new_filename)
-        return os.path.join('staticfiles/avatars', new_filename)
+        return os.path.join('static/avatars', new_filename)
+    avatar = models.ImageField(upload_to=user_avatar_upload_to, blank=True, null=True)
+
     email = models.EmailField(unique=True)
     username = models.CharField(blank=False,null=False,max_length=200,unique=True)
     fullname = models.CharField(blank=False,null=False,max_length=200,default="not taken")
@@ -47,7 +49,6 @@ class CustomUser(AbstractUser,PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     expiry_date = models.DateTimeField(blank=True,null=True)
-    avatar = models.ImageField(upload_to=user_avatar_upload_to, blank=True, null=True)
     # birthdate = models.DateField(null=True, blank=True)
     address = models.TextField(max_length=500, blank=True)
     # location = models.CharField(max_length=30, blank=True)
