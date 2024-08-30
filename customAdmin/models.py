@@ -31,11 +31,10 @@ class CustomUser(AbstractUser,PermissionsMixin):
     
     def user_avatar_upload_to(instance, filename):
     # Ensure the user ID is available
-        user_id = instance.pk
         ext = os.path.splitext(filename)[1]  # Get file extension (e.g., .jpg or .png)
         
         # Construct the new filename
-        new_filename = f'{user_id}{ext}'
+        new_filename = f'{instance.username}{ext}'
         
         # Return the full path to the file
         print(new_filename)
