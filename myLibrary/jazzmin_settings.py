@@ -2,8 +2,8 @@ ui_settings = {
     "site_title": "StudySphere Libray Manager",
     "site_header": "StudySphere",
     "site_brand": "StudySphere",
-    "site_logo": "booking/images/StudySphere.png",
-    # "site_logo": "booking/images/logo2.png",
+    # "site_logo": "booking/images/StudySphere.png",
+    "site_logo": "logo/pustakshala.png",
     # for login
     "welcome_sign": "Welcome to the StudySphere Library Manager",
 
@@ -16,7 +16,7 @@ ui_settings = {
     "show_ui_builder" : True,
     "show_ui_builder":True,
     "usermenu_links": [
-        {"name": "Profile", "url": "/admin/customer-profile", "new_window": True},
+        {"name": "Profile", "url": "/user-profile", "new_window": True},
     ],
 
 }
