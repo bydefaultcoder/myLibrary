@@ -15,12 +15,12 @@ from django.contrib.admin.models import LogEntry
 from django.utils.timezone import now
 from datetime import timedelta
 
-def custom_dashboard_view(request):
-    return render(request, 'admin/profile.html', {
-        'user': request.user,
-        'site_title': 'User Profile',
-        **admin.site.each_context(request),
-    })
+# def custom_dashboard_view(request):
+#     return render(request, 'admin/profile.html', {
+#         'user': request.user,
+#         'site_title': 'User Profile',
+#         **admin.site.each_context(request),
+#     })
 
 
 class MyLibraryAdminSite(AdminSite):
@@ -52,12 +52,12 @@ class MyLibraryAdminSite(AdminSite):
         extra_context = extra_context or {}
         extra_context['recent_actions'] = recent_actions
         return super().index(request, extra_context=extra_context)
-    def get_urls(self):
-        urls = super().get_urls()
-        custom_urls = [
-            path('user-profile/', self.admin_view(custom_dashboard_view), name='custom_dashboard'),
-        ]
-        return custom_urls + urls
+    # def get_urls(self):
+    #     urls = super().get_urls()
+    #     custom_urls = [
+    #         path('user-profile/', self.admin_view(custom_dashboard_view), name='custom_dashboard'),
+    #     ]
+    #     return custom_urls + urls
 
  
 
