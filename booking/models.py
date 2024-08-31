@@ -23,7 +23,7 @@ class Location(models.Model):
     location_id = models.AutoField(primary_key=True, verbose_name="Location No")
     discription = models.TextField()
     number_of_seats = models.PositiveIntegerField(verbose_name='No of Seats')
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active',editable=False)
     created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL ,null= True,blank=False,editable=False)
     class Meta:
         verbose_name = "library"          # Singular form
@@ -57,7 +57,7 @@ class Seat(models.Model):
     seat_id = models.AutoField(primary_key=True, verbose_name="Seat Id")
     seat_no = models.PositiveIntegerField(blank=True,null=True, verbose_name="Seat No",editable=False)
     location = models.ForeignKey(Location, on_delete=models.CASCADE, verbose_name='Location no.')
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='vacant')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='vacant',editable=False)
     deleted = models.BooleanField(default=False,blank=None,null=False)
     created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True,editable=False)
     class Meta:
@@ -110,7 +110,7 @@ class Student(models.Model):
     phone_no = models.CharField(max_length=10,validators=[MaxLengthValidator(10),MinLengthValidator(10)])
     address = models.TextField()
     adhar_no = models.CharField(max_length=12, unique=True,validators=[MaxLengthValidator(12),MinLengthValidator(12)])
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active',editable=False)
     created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True,editable=False)
     avatar = models.ImageField(upload_to=user_avatar_upload_to, blank=True, null=True)
     class Meta:
@@ -225,7 +225,7 @@ class MonthlyPlan(models.Model):
     hours = models.PositiveIntegerField(verbose_name='No. of hours',validators=[MinValueValidator(1)])
     prize = models.PositiveIntegerField(verbose_name='Monthly price(in rupees)')
     discription = models.TextField()
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active',editable=False)
     created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL ,null= True,blank=False,editable=False)
 
     def __str__(self):

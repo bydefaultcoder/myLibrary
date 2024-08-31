@@ -1,7 +1,7 @@
 ui_settings = {
     "site_title": "Pathshala Libray Manager",
-    "site_header": "pathshala",
-    "site_brand": "Pathshala",
+    "site_header": "PLM",
+    "site_brand": "PLM",
     "site_logo": "logo/pathshala.png",
     # for login
     "welcome_sign": "Welcome to the Pathshala Library Manager",
