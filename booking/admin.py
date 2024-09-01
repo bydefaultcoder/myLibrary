@@ -12,6 +12,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
 from django.db.models import Min, Max
 import logging
+from django.utils.html import format_html
 from django.utils import timezone as tz
 from dateutil.relativedelta import relativedelta
 logger = logging.getLogger(__name__)
@@ -233,9 +234,20 @@ class SeatAdmin(admin.ModelAdmin):
             formfield.queryset = Student.objects.filter(created_by=request.user)
         return formfield
 
+
+
+# -----------------------------------------------------
+# for student
+from django import forms
+class ImagePreviewWidget(forms.ClearableFileInput):
+    def render(self, name, value, attrs=None, renderer=None):
+        output = super().render(name, value, attrs, renderer)
+        if value and hasattr(value, 'url'):
+            output = format_html('<img src="{}" style="max-width: 200px; max-height: 200px; margin-bottom: 10px;"/><br/>', value.url) + output
+        return output
 # @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ('stu_no','name', 'phone_no', 'adhar_no', 'status')
+    list_display = ('stu_no','name', 'phone_no', 'adhar_no','image_tag', 'status')
     list_filter = ('status',)
     search_fields = ('name', 'phone_no', 'adhar_no')
 
@@ -248,6 +260,11 @@ class StudentAdmin(admin.ModelAdmin):
         if request.user.is_superuser:
             return qs
         return qs.filter(created_by=request.user)
+    def image_tag(self, obj):
+        if obj.avatar:
+            return format_html('<img src="{}" style="max-width:100px; max-height:100px"/>'.format(obj.avatar.url))
+
+    image_tag.short_description = 'Image'
 
     def save_model(self, request, obj, form, change):
         if not change:  # If the object is being created
@@ -278,6 +295,10 @@ class StudentAdmin(admin.ModelAdmin):
                         return f"{days_remain.days} days to expire"
         else:
             "Seat not alloted"
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        if db_field.name == 'avatar':
+            kwargs['widget'] = ImagePreviewWidget()
+        return super().formfield_for_dbfield(db_field, **kwargs)
 
 # Re-register UserAdmin
 # admin_site.unregister(User)

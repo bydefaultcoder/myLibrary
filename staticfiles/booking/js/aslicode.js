@@ -52,7 +52,7 @@
                 console.log("hello for location")
                 // Fetch seats associated with the selected location
                 $.ajax({
-                    url: '/admin/booking/get_seats_by_location/',  // URL to fetch seats
+                    url: '/admin/api-booking/get_seats_by_location/',  // URL to fetch seats
                     data: {
                         'location_id': locationId
                     },
@@ -78,11 +78,11 @@
             // console.log("hello")
             console.log("hello")
             var SeatId = $(this).val();  // Get selected seat ID
-            console.log(SeatId,"3333333333333333333")
+            // console.log(SeatId,"3333333333333333333")
             if (SeatId) {
 
                 $.ajax({
-                    url: '/admin/booking/get_timming_by_seat/',  // URL to fetch seats
+                    url: '/admin/api-booking/get_timming_by_seat/',  // URL to fetch seats
                     data: {
                         'seat_id': SeatId,
                         'joining_date':$('#id_joining_date').val()

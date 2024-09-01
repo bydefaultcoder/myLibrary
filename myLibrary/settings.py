@@ -36,7 +36,7 @@ DEBUG = True
 import socket
 hostname = socket.gethostname()
 IPAddr = socket.gethostbyname(hostname)
-print(IPAddr)
+# print(IPAddr)
 ALLOWED_HOSTS = ["*",IPAddr]
 
 
@@ -89,7 +89,7 @@ MIDDLEWARE = [
     'customAdmin.expirymiddleware.CheckUserExpiryMiddleware',
 ]
 TEMPLATES = os.path.join(BASE_DIR,"templates")
-print(TEMPLATES)
+# print(TEMPLATES)
 ROOT_URLCONF = 'myLibrary.urls'
 TEMPLATES = [
     {
@@ -99,6 +99,7 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
+                # 'customAdmin.context_processors.jazzmin_usermenu_links',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -127,7 +128,7 @@ os.getenv('DATABASE_URL')
 #         }  
 #     }  
 # }  
-print(os.getenv('DEVLOPMENT'))
+# print(os.getenv('DEVLOPMENT'))
 if os.getenv('DEVLOPMENT')=="TRUE":
     dbuser = 'root'
     PASSWORD ='Ra&5_153'

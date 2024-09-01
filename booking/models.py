@@ -106,13 +106,13 @@ class Student(models.Model):
         print(new_filename)
         return os.path.join('student/avatars', new_filename)
     stu_no = models.PositiveIntegerField(blank=True,null=True,editable=False)
+    avatar = models.ImageField(upload_to=user_avatar_upload_to, blank=True, null=True)
     name = models.CharField(max_length=100)
     phone_no = models.CharField(max_length=10,validators=[MaxLengthValidator(10),MinLengthValidator(10)])
     address = models.TextField()
     adhar_no = models.CharField(max_length=12, unique=True,validators=[MaxLengthValidator(12),MinLengthValidator(12)])
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active',editable=False)
     created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True,editable=False)
-    avatar = models.ImageField(upload_to=user_avatar_upload_to, blank=True, null=True)
     class Meta:
         verbose_name = "Student"          # Singular form
         verbose_name_plural = "Students"  # Plural form
@@ -131,6 +131,7 @@ class Student(models.Model):
                 self.status = 'enrolled'
         else:
            self.stu_no = Student.objects.filter(created_by=self.created_by).count()+ 1
+        self.avatar.name = self.avatar.name.replace('None',f'{self.stu_no}')
 
         super().save(*args, **kwargs)
 

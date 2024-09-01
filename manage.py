@@ -13,11 +13,11 @@ def main():
     try:
         from django.core.management import execute_from_command_line
         # execute_from_command_line([sys.argv[0], "runserver", f"{IPAddr}:4000"])
-        if sys.argv[1]== 'runserver':
-            # execute_from_command_line([sys.argv[0], "runserver", f"0.0.0.0:4000"])
-            execute_from_command_line(sys.argv)
-        else:
-            execute_from_command_line(sys.argv)
+        # if sys.argv[1]== 'runserver':
+        #     # execute_from_command_line([sys.argv[0], "runserver", f"0.0.0.0:4000"])
+        #     execute_from_command_line(sys.argv)
+        # else:
+        execute_from_command_line(sys.argv)
     # print(pyqrcode.create(f"{IPAddr}:4000"))
     except ImportError as exc:
         raise ImportError(

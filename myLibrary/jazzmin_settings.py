@@ -14,13 +14,11 @@ ui_settings = {
     # "language_chooser": True,
     "show_ui_builder" : True,
     "show_ui_builder":True,
-    "usermenu_links": [
-        {"name": "Profile", "url": "/admin/customer-profile", "new_window": True},
-    ],
+    'custom_template': 'admin/jazzmin/base_site.html',
     "icons": {
-        "auth": "fas fa-users-cog",
-        "auth.user": "fas fa-user",
-        "auth.Group": "fas fa-users",
+        # "auth": "fas fa-users-cog",
+        "customAdmin.customUser": "fas fa-user",
+        "auth.Group": "fas fa-users-cog",
         "booking.Location": "fas fa-building",
         "booking.Seat": "fas fa-sharp fa-solid fa-chair",
         # "booking.MonthlyPlan": "fas icon-suitcase",
@@ -28,6 +26,15 @@ ui_settings = {
         'booking.Payment':"fas fa-money-bill",
         "booking.booking":"fas  fa-check"
     },
+
+    "usermenu_links": [
+         {"name": "Django Documentation", "url": "https://docs.djangoproject.com/en/stable/", "new_window": True},
+         {"name": "Profile", "url": "/admin/user-profile/", "new_window": False},
+        # {"name": "Support", "url": "https://support.example.com", "new_window": True},
+        # {"model":  "customAdmin.CustomUser"},  # Links directly to the user model in the admin panel
+        # {"name": "Documentation", "url": "https://docs.example.com", "new_window": True},
+        # {"app": "myapp"},  # Links to a specific app's list view in the admin panel
+    ],
 
 }
 
