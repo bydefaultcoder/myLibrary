@@ -131,7 +131,7 @@ class Student(models.Model):
                 self.status = 'enrolled'
         else:
            self.stu_no = Student.objects.filter(created_by=self.created_by).count()+ 1
-        self.avatar.name = self.avatar.name.replace('None',f'{self.stu_no}')
+        self.avatar.name = self.avatar.name.replace('None',f'{self.stu_no}') 
 
         super().save(*args, **kwargs)
 
