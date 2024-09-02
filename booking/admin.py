@@ -241,10 +241,42 @@ class SeatAdmin(admin.ModelAdmin):
 from django import forms
 class ImagePreviewWidget(forms.ClearableFileInput):
     def render(self, name, value, attrs=None, renderer=None):
+        # Get the basic output from the super class
         output = super().render(name, value, attrs, renderer)
+        
+        # Image preview HTML if there's an existing image
+        preview_html = ''
         if value and hasattr(value, 'url'):
-            output = format_html('<img src="{}" style="max-width: 200px; max-height: 200px; margin-bottom: 10px;"/><br/>', value.url) + output
-        return output
+            preview_html = format_html(
+                '<img id="image-preview" src="{}" style="max-width: 200px; max-height: 200px; margin-bottom: 10px;"/><br/>', 
+                value.url
+            )
+        
+        # JavaScript to update the image preview
+        js_script = format_html('''
+            <script type="text/javascript">
+                document.getElementById('{input_id}').onchange = function(event) {{
+                    var reader = new FileReader();
+                    reader.onload = function(e) {{
+                        var img = document.getElementById('image-preview');
+                        if (!img) {{
+                            img = document.createElement('img');
+                            img.id = 'image-preview';
+                            img.style.maxWidth = '200px';
+                            img.style.maxHeight = '200px';
+                            img.style.marginBottom = '10px';
+                            var inputElement = document.getElementById('{input_id}');
+                            inputElement.parentNode.insertBefore(img, inputElement);
+                        }}
+                        img.src = e.target.result;
+                    }};
+                    reader.readAsDataURL(event.target.files[0]);
+                }};
+            </script>
+        ''', input_id=attrs['id'])
+
+        # Combine preview HTML, the output of the original widget, and the JS script
+        return format_html('{}{}{}', preview_html, output, js_script)
 # @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
     list_display = ('stu_no','name', 'phone_no', 'adhar_no','image_tag', 'status')
