@@ -1,7 +1,7 @@
 ui_settings = {
-    "site_title": "Pathshala Libray Manager",
-    "site_header": "PLM",
-    "site_brand": "PLM 1.0",
+    "site_title": "Studyground Libray Manager",
+    "site_header": "SLM",
+    "site_brand": "SLM 1.0",
     # "site_brand": "MyCoolApp 2.0",  # Custom version name in the footer
     "site_logo": "logo/pathshala.png",
     "version": "v1.0",  # Custom version name
