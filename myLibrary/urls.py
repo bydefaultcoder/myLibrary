@@ -24,6 +24,7 @@ from customAdmin.admin import admin_site
 
 from django.conf.urls.static import static
 from django.conf import settings 
+from .views import homepage
 urlpatterns = [
     # path('grappelli/', include('grappelli.urls'))
     re_path(r'^i18n/', include('django.conf.urls.i18n')),
@@ -37,4 +38,5 @@ urlpatterns = [
     # path('book/<int:pk>/', BookDetailView.as_view(), name='book_detail'),
     path('admin/', admin_site.urls),
     path('api/students/', include('students.urls')),
+    path('', homepage),
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_DIR)+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

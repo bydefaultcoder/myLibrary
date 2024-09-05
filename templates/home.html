@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyGround.Online</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+
+        .box {
+            background-color: white;
+            width: 250px;
+            height: 150px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .box:hover {
+            box-shadow: 0 6px 12px rgba(23, 162, 184, 0.5);
+        }
+
+        .box h2 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Welcome to StudyGround </h1>
+
+    <div class="container">
+        <!-- Admin Box -->
+        <a href="/admin" class="box">
+            <h2>Library Manager</h2>
+        </a>
+
+        <!-- Student Box -->
+        <a href="/student" class="box">
+            <h2>Student</h2>
+        </a>
+    </div>
+
+</body>
+</html>
