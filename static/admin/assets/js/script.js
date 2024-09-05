@@ -19,7 +19,8 @@ function main(){
                 }
             },
             // colors: ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444'],
-            colors: ['#3f6791', '#3b82f6', '#10b981', '#f59e0b', '#ef4444'],
+            // colors: ['#3f6791', '#3b82f6', '#10b981', '#f59e0b', '#ef4444'],
+            colors: ['#17a2b8', '#3b82f6', '#10b981', '#f59e0b', '#ef4444'],
             xaxis: {
                 labels: {
                     style: {
