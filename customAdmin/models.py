@@ -8,7 +8,9 @@ from django.contrib.auth.models import AbstractUser
 # from groups
 # from django_group_model.models import AbstractGroup
 # AbstractGroup
+from django.core.validators import MinValueValidator,MaxLengthValidator,MinLengthValidator
 from django.db import models
+from django.utils import timezone
 
 
 class CustomUserManager(BaseUserManager):
@@ -42,6 +44,8 @@ class CustomUser(AbstractUser,PermissionsMixin):
     avatar = models.ImageField(upload_to=user_avatar_upload_to, blank=True, null=True)
 
     email = models.EmailField(unique=True)
+    w_number = models.CharField(max_length=10,validators=[MaxLengthValidator(10),MinLengthValidator(10)],verbose_name="Whatsapp No.")
+    c_number = models.CharField(max_length=10,validators=[MaxLengthValidator(10),MinLengthValidator(10)],verbose_name="Calling No.")
     username = models.CharField(blank=False,null=False,max_length=200,unique=True)
     fullname = models.CharField(blank=False,null=False,max_length=200,default="not taken")
     library_name = models.CharField(blank=True,null=True,max_length=200)
@@ -59,7 +63,9 @@ class CustomUser(AbstractUser,PermissionsMixin):
 
     def save(self, *args, **kwargs) -> None:
         if not self.pk :
+            # self.date_joined = timezone.localdate(self.date_joined)
             self.expiry_date = self.date_joined + relativedelta(months=1)
+            # self.expiry_date =  self.date_joined + relativedelta(months=1)
         # else:
         print(self.first_name,self.last_name)
 

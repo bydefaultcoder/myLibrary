@@ -31,13 +31,25 @@
                         </div>
                         <!-- Full Name -->
                         <div class="form-group">
-                            <label for="full_name">Full Name</label>
-                            <input type="text" class="form-control" id="full_name" name="full_name" value="{{ form.full_name.value }}">
+                            <label for="fullname">Full Name</label>
+                            <input type="text" class="form-control" id="fullname" name="fullname" value="{{ form.fullname.value }}">
+                        </div>
+                        <!-- Full Name -->
+                        <div class="form-group">
+                            <label for="c_number">Calling No.</label>
+                            <input type="text" class="form-control" id="c_number" name="c_number" value="{{form.c_number.value }}" maxlength="10">
+                        </div>
+                        <!-- Full Name -->
+                        <div class="form-group">
+                            <label for="w_number">WhatsApp No.</label>
+                            <input type="text" class="form-control" id="w_number" name="w_number" value="{{form.w_number.value }}" maxlength="10">
                         </div>
                         <!-- Address -->
                         <div class="form-group">
                             <label for="address">Address</label>
-                            <input type="text" class="form-control" id="address" name="address" value="{{ form.address.value }}">
+                            <!-- <input type="text" class="form-control" id="address" name="address" value="{{ form.address.value }}"> -->
+                            <textarea class="form-control" id="address" name="address" placeholder="Please provide your address">{{ form.address.value }}</textarea> 
+
                         </div>
                         <button type="submit" class="btn btn-primary">Update Profile</button>
                     </form>
@@ -46,14 +58,28 @@
                     <div class="form-group row">
                         <label for="username" class="col-sm-3 col-form-label">Username</label>
                         <div class="col-sm-9">
-                            <input type="text" readonly class="form-control-plaintext" id="username" value="{{ user.username }}">
+                            :<b>
+                                {{ user.username }}
+                            </b>
+                            <!-- <input type="text" readonly class="form-control-plaintext" id="username" value="{{ user.username }}"> -->
                         </div>
                     </div>
                     <!-- Email (Read-only) -->
                     <div class="form-group row">
                         <label for="email" class="col-sm-3 col-form-label">Email</label>
                         <div class="col-sm-9">
-                            <input type="email" readonly class="form-control-plaintext" id="email" value="{{ user.email }}">
+                            :<b>
+                                {{ user.email }}
+                            </b>
+                            <!-- <input type="email" readonly class="form-control-plaintext" id="email" value="{{ user.email }}"> -->
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="ex_d_mess" class="col-sm-3 col-form-label">Expiry Of Plan</label>
+                        <div class="col-sm-9">
+                            <!-- {{user.expiry_date}} -->
+                             :<b>{{ ex_d_mess }}</b>
+                            <!-- <input type="text" readonly class="form-control-plaintext" id="ex_d_mess" value="{{ ex_d_mess }}"> -->
                         </div>
                     </div>
                 </div>

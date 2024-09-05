@@ -11,19 +11,21 @@ from django.core.validators import MinValueValidator,MaxLengthValidator,MinLengt
 
 
 from customAdmin.models import CustomUser
+from students.models import Student
 # import calendar
  
 class Location(models.Model):
     STATUS_CHOICES = [
         ('active', 'Active'),
         ('inactive', 'Inactive'),
+        ('exposed', 'Exposed'),
         # ('suspended', 'Suspended'),
     ]
-    location_name = models.CharField(max_length=100)
-    location_id = models.AutoField(primary_key=True, verbose_name="Location No")
-    discription = models.TextField()
+    location_name = models.CharField(max_length=100,verbose_name="Library Name")
+    location_id = models.AutoField(primary_key=True, verbose_name="Library Id")
+    discription = models.TextField(null=True,blank=True)
     number_of_seats = models.PositiveIntegerField(verbose_name='No of Seats')
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active',editable=False)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
     created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL ,null= True,blank=False,editable=False)
     class Meta:
         verbose_name = "library"          # Singular form
@@ -31,18 +33,24 @@ class Location(models.Model):
 
     def __str__(self):
         return f'{self.location_name}-{self.location_id}'
-
+    @transaction.atomic
     def save(self, *args, **kwargs):
         # Check if this is a new location by verifying if location_id is None
-        creating_new = self.location_id is None
+        try:
+            with transaction.atomic():
         # Create seats only when a new location is created
-        num_of_seat = self.number_of_seats
-        if creating_new:
-            self.number_of_seats = 0
-            super().save(*args, **kwargs)  # Save the location first to ensure it has an ID
-            for _ in range(num_of_seat):
-                Seat.objects.create(location=self, status='vacant',created_by=self.created_by)
-        super().save(*args, **kwargs)
+                num_of_seat = self.number_of_seats
+                if self.location_id is None:
+                    super().save(*args, **kwargs)  # Save the location first to ensure it has an ID
+                    seats = []
+                    i = 1
+                    for _ in range(num_of_seat):
+                        seats.append(Seat(seat_no = i,location=self, status='vacant',created_by=self.created_by))
+                        i+=1
+                    Seat.objects.bulk_create(seats)
+                super().save(*args, **kwargs)
+        except Exception as e:
+            print("Error..",e)
 
 @receiver(post_delete, sender=Location)
 def update_location_on_seat_delete(sender, instance, **kwargs):
@@ -50,15 +58,15 @@ def update_location_on_seat_delete(sender, instance, **kwargs):
 
 class Seat(models.Model):
     STATUS_CHOICES = [
-        ('vacant', 'Vacant'),
-        ('engaged', 'Engaged'),
-        ('inactive', 'Inactive'),
+        ('active', 'Active'),
+        ('removed', 'Removed'),
     ]
+
     seat_id = models.AutoField(primary_key=True, verbose_name="Seat Id")
     seat_no = models.PositiveIntegerField(blank=True,null=True, verbose_name="Seat No",editable=False)
     location = models.ForeignKey(Location, on_delete=models.CASCADE, verbose_name='Location no.')
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='vacant',editable=False)
-    deleted = models.BooleanField(default=False,blank=None,null=False)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='vacant')
+    deleted = models.BooleanField(default=False,blank=None,null=False,editable=False)
     created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True,editable=False)
     class Meta:
         verbose_name = "Seat"          # Singular form
@@ -88,52 +96,6 @@ def update_location_on_seat_delete(sender, instance, **kwargs):
     location.number_of_seats -= 1
     location.save()
 
-class Student(models.Model):
-    STATUS_CHOICES = [
-        ('enrolled', 'Enrolled'),
-        ('alloted', 'Alloted'),
-        ('suspended', 'Suspended'),
-    ]
-    def user_avatar_upload_to(instance, filename):
-    # Ensure the user ID is available
-        user_id = instance.pk
-        ext = os.path.splitext(filename)[1]  # Get file extension (e.g., .jpg or .png)
-        
-        # Construct the new filename
-        new_filename = f'{user_id}{ext}'
-        
-        # Return the full path to the file
-        print(new_filename)
-        return os.path.join('student/avatars', new_filename)
-    stu_no = models.PositiveIntegerField(blank=True,null=True,editable=False)
-    avatar = models.ImageField(upload_to=user_avatar_upload_to, blank=True, null=True)
-    name = models.CharField(max_length=100)
-    phone_no = models.CharField(max_length=10,validators=[MaxLengthValidator(10),MinLengthValidator(10)])
-    address = models.TextField()
-    adhar_no = models.CharField(max_length=12, unique=True,validators=[MaxLengthValidator(12),MinLengthValidator(12)])
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active',editable=False)
-    created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True,editable=False)
-    class Meta:
-        verbose_name = "Student"          # Singular form
-        verbose_name_plural = "Students"  # Plural form
-
-    def __str__(self):
-        return f"{self.name} ({self.status})"
-    
-    def save(self, *args, **kwargs):
-        # Check if the status has changed
-        
-        if self.pk:
-            old_status = Student.objects.get(pk=self.pk).status
-            if old_status == 'enrolled':
-                self.status = 'alloted'
-            else:
-                self.status = 'enrolled'
-        else:
-           self.stu_no = Student.objects.filter(created_by=self.created_by).count()+ 1
-        self.avatar.name = self.avatar.name.replace('None',f'{self.stu_no}') 
-
-        super().save(*args, **kwargs)
 
 class Booking(models.Model):
     location = None
@@ -164,8 +126,7 @@ class Booking(models.Model):
         student.status = 'alloted'
         seat.status = 'engaged'
         print(kwargs,args)
-        print(self.student,self.seat,self.location,self.plan,self.start_time,self.end_time,self.remain_no_of_months,self.discount,self.joining_date,self.total_amount,"here")
-            # {-'student': <Student: Vinay (enrolled)>, 
+
         amount = int(self.plan.split("_")[1]) * int(self.remain_no_of_months)
         print(self.pk,"pk here 156" ,self.pk is None,self.pk==None)
         if self.pk is None:
@@ -186,7 +147,7 @@ class Booking(models.Model):
                 print("Error.." ,e)
 
     def __str__(self):
-        return f'name:{self.student.name} - room/hall:{self.seat.location.location_id} - seat no: {self.seat.seat_id} - ({self.status})'
+        return f'name: {self.student.first_name} {self.student.last_name}  Library:{self.seat.location.location_id} - seat no: {self.seat.seat_id} - ({self.status})'
 
 @receiver(post_delete,sender=Booking)
 @transaction.atomic
@@ -197,7 +158,8 @@ def update_seat_on_delete_booking(sender, instance:Booking, **kwargs):
         with transaction.atomic():
             # print(seat.seat_id,student.phone_no,"updated succesfully")
             seat = instance.seat
-            if Booking.objects.filter(seat=seat).count() >=1:
+            # ager sea
+            if Booking.objects.filter(seat=seat).count()==0:
                 seat.status = 'vacant'
                 seat.save()
             student.save()
@@ -208,24 +170,23 @@ def update_seat_on_delete_booking(sender, instance:Booking, **kwargs):
 
 
 
-
-    # user.
-    # location = instance.location
-    # location.number_of_seats -= 1
-    # location.save()
-
-
-
 class MonthlyPlan(models.Model):
     STATUS_CHOICES = [
         ('active', 'Active'),
         ('inactive', 'Inactive'),
         # ('suspended', 'Suspended'),
     ]
+    planing_for_CHOICES = [
+                     ('d','DAYS'),
+                     ('w','WEEKS'),
+                     ('m','MONTHS'),
+                     ]
     timming_id = models.AutoField(primary_key=True, verbose_name="Location No")
     hours = models.PositiveIntegerField(verbose_name='No. of hours',validators=[MinValueValidator(1)])
-    prize = models.PositiveIntegerField(verbose_name='Monthly price(in rupees)')
-    discription = models.TextField()
+    planing_for = models.CharField(max_length=10, choices=planing_for_CHOICES, default='m')
+    duration = models.PositiveIntegerField(default=1,verbose_name="Duration (no. Days/Months/Weeks)")
+    prize = models.PositiveIntegerField(verbose_name='Price(in rupees)')
+    discription = models.TextField(null =True, blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active',editable=False)
     created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL ,null= True,blank=False,editable=False)
 

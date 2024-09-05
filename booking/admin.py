@@ -1,6 +1,10 @@
+from typing import Any
 from django.contrib import admin
+
+from .LocationForm import LocationUpdateForm,LocationCreateForm
+# LocationCreateForm, 
 from .filters import SeatFilterByLocations
-from customAdmin.admin import CustomUserAdmin, admin_site
+from customAdmin.admin import CustomUserAdmin, admin_site 
 from customAdmin.models import CustomUser
 # from myLibrary.customAdmin.customAdminForm import CustomUserCreationForm
 from .BookingForm import CustomBookingForm
@@ -10,11 +14,13 @@ from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
-from django.db.models import Min, Max
+from django.db.models import Min, Max ,Count, Q
 import logging
 from django.utils.html import format_html
 from django.utils import timezone as tz
 from dateutil.relativedelta import relativedelta
+import csv
+from django.http import HttpResponse
 logger = logging.getLogger(__name__)
 
 
@@ -22,12 +28,21 @@ admin_site.register(Group)
 admin_site.register(CustomUser,CustomUserAdmin)
 
 class LocationAdmin(admin.ModelAdmin):
-    # list_display
+
     list_display = ('display_name','number_of_seats','discription',)
     def display_name(self,modelObject):
         return f"{modelObject.location_name}-({modelObject.location_id})"
-    
 
+    oldForm =  None
+    def get_form(self, request, obj=None, **kwargs):
+        if obj is not None:
+            self.form = LocationUpdateForm
+        else:
+            self.form = LocationCreateForm
+
+
+        return super().get_form(request, obj, **kwargs)
+    
     def save_model(self, request, obj, form, change):
         if not change:  # If the object is being created
             obj.created_by = request.user
@@ -38,6 +53,8 @@ class LocationAdmin(admin.ModelAdmin):
         if request.user.is_superuser:
             return qs
         return qs.filter(created_by=request.user)
+    def __init__(self, model: type, admin_site: admin.AdminSite | None) -> None:
+        super().__init__(model, admin_site)
 
 # @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
@@ -190,24 +207,19 @@ class SeatAdmin(admin.ModelAdmin):
     class Meta:
         ordering = ['-seat_no']  # Sorts by title in ascending order
 
-    # def showLocationName(self,modelObject):
-    #     return f'{modelObject.location.location_name} '
-
     def start_and_end_timing(self, modelObject):
         # Filter bookings for the specific seat
+        if modelObject.status == 'removed':
+            return "Removed"
         seatObj = Booking.objects.filter(seat=modelObject)
-
         # Aggregate to get the earliest start_time and the latest end_time
         start_time = seatObj.aggregate(start_time=Min('start_time'))['start_time']
         end_time = seatObj.aggregate(end_time=Max('end_time'))['end_time']
 
-        # # Check if both times exist
         if start_time and end_time:
-            # Return the duration between start and end times
-            # duration = end_time - start_time
             return f'{start_time} - {end_time}'
         else:
-            return '--'
+            return 'Not alloted (Active)'
         # return '333'
 
     def get_queryset(self, request):
@@ -227,127 +239,39 @@ class SeatAdmin(admin.ModelAdmin):
         # print(db_field)s
         formfield = super().formfield_for_foreignkey(db_field, request, **kwargs)
         if db_field.name == 'location':
-            # Filter locations based on the current user
             formfield.queryset = Location.objects.filter(created_by=request.user)
         if db_field.name == 'student':
-            # Filter locations based on the current user
             formfield.queryset = Student.objects.filter(created_by=request.user)
         return formfield
 
-
-
-# -----------------------------------------------------
-# for student
-from django import forms
-class ImagePreviewWidget(forms.ClearableFileInput):
-    def render(self, name, value, attrs=None, renderer=None):
-        # Get the basic output from the super class
-        output = super().render(name, value, attrs, renderer)
-        
-        # Image preview HTML if there's an existing image
-        preview_html = ''
-        if value and hasattr(value, 'url'):
-            preview_html = format_html(
-                '<img id="image-preview" src="{}" style="max-width: 200px; max-height: 200px; margin-bottom: 10px;"/><br/>', 
-                value.url
-            )
-        
-        # JavaScript to update the image preview
-        js_script = format_html('''
-            <script type="text/javascript">
-                document.getElementById('{input_id}').onchange = function(event) {{
-                    var reader = new FileReader();
-                    reader.onload = function(e) {{
-                        var img = document.getElementById('image-preview');
-                        if (!img) {{
-                            img = document.createElement('img');
-                            img.id = 'image-preview';
-                            img.style.maxWidth = '200px';
-                            img.style.maxHeight = '200px';
-                            img.style.marginBottom = '10px';
-                            var inputElement = document.getElementById('{input_id}');
-                            inputElement.parentNode.insertBefore(img, inputElement);
-                        }}
-                        img.src = e.target.result;
-                    }};
-                    reader.readAsDataURL(event.target.files[0]);
-                }};
-            </script>
-        ''', input_id=attrs['id'])
-
-        # Combine preview HTML, the output of the original widget, and the JS script
-        return format_html('{}{}{}', preview_html, output, js_script)
-# @admin.register(Student)
-class StudentAdmin(admin.ModelAdmin):
-    list_display = ('stu_no','name', 'phone_no', 'adhar_no','image_tag', 'status')
-    list_filter = ('status',)
-    search_fields = ('name', 'phone_no', 'adhar_no')
-
-    class Meta:
-        ordering = ['stu_no']  # Sorts by title in ascending order
-
-    def get_queryset(self, request):
-        # Only show objects created by the current user
-        qs = super().get_queryset(request)
-        if request.user.is_superuser:
-            return qs
-        return qs.filter(created_by=request.user)
-    def image_tag(self, obj):
-        if obj.avatar:
-            return format_html('<img src="{}" style="max-width:100px; max-height:100px"/>'.format(obj.avatar.url))
-
-    image_tag.short_description = 'Image'
-
-    def save_model(self, request, obj, form, change):
-        if not change:  # If the object is being created
-            obj.created_by = request.user
-        obj.save()
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        formfield = super().formfield_for_foreignkey(db_field, request, **kwargs)
-        if db_field.name == 'location':
-            formfield.queryset = Location.objects.filter(created_by=request.user)
-        return formfield
-    
-    def days_to_expire(self,modelObject):
-        booking  = Booking.objects.filter(student = modelObject.pk).latest("pk")
-        if  booking != None:
-            objects  = Payment.objects.filter(booking=booking.pk)
-            print(object.query)
-            # currentMonthObj = None
-            for obj in objects:
-                print(obj.joining_date,obj.remain_no_of_months)
-                commingdate = obj.joining_date + relativedelta(months=obj.remain_no_of_months)
-                days_remain = commingdate - tz.now().date()
-                if obj.joining_date <= tz.now().date():
-                    if  days_remain.days <0:
-                        return "Expired"
-                    elif days_remain.days ==0:
-                        return "Expiring today"
-                    else:
-                        return f"{days_remain.days} days to expire"
-        else:
-            "Seat not alloted"
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'avatar':
-            kwargs['widget'] = ImagePreviewWidget()
-        return super().formfield_for_dbfield(db_field, **kwargs)
-
-# Re-register UserAdmin
-# admin_site.unregister(User)
-
-# class GroupAdmin(admin.ModelAdmin):
-#     list_display = ('name', 'description')  # Example fields
 class MonthlyPlanAdmin(admin.ModelAdmin):
-    list_display = ('hours', 'prize', 'discription', 'status')
-    list_filter = ('status','hours', 'prize')
+    list_display = ('getPlanningFor','getHours', 'getPrize',  'status')
+    list_filter = ('status','hours', 'prize','planing_for')
     search_fields = ('hours', 'phone_no')
 
+    def getPrize(self, modelObj):
+        return f'{modelObj.prize} ₹'
+    getPrize.short_description = _('Prize (₹)')
+
     def get_queryset(self, request):
         # Only show objects created by the current user
         qs = super().get_queryset(request)
         if request.user.is_superuser:
             return qs
         return qs.filter(created_by=request.user)
+    def getPlanningFor(self, modelObj):
+        if modelObj.planing_for=="d" :
+          output = f'For {modelObj.duration} Days'
+        if modelObj.planing_for=="m" :
+          output = f'For {modelObj.duration} Months'
+        if modelObj.planing_for=="w" :
+          output = f'For {modelObj.duration} Weeks'
+        return output
+    getPlanningFor.short_description = _('Planning For')
+
+    def getHours(self, modelObj):
+        return f'{modelObj.hours} Hours'
+    getPlanningFor.short_description = _('No. OF hours')
     
     def save_model(self, request, obj, form, change):
         if not change:  # If the object is being created
@@ -378,8 +302,3 @@ admin_site.register(MonthlyPlan,MonthlyPlanAdmin)
 admin_site.register(Seat,SeatAdmin)
 admin_site.register(Location,LocationAdmin)
 admin_site.register(Booking,BookingAdmin)
-admin_site.register(Student,StudentAdmin)
-# from admin_interface.models import Theme
-# from django.contrib import admin
-
-# admin_site.register(Theme)

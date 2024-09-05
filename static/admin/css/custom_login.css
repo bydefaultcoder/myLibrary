@@ -1,0 +1,18 @@
+body.login {
+    background-color: #f0f0f0;
+}
+
+/* Customize the login form */
+.login-form {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Change the color of the login button */
+.login-form .submit-row input {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+}

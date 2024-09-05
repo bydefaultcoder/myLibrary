@@ -1,6 +1,14 @@
 {% extends "admin/base_site.html" %}
 {% load static %}
 {% block extrahead %}
+
+{% block sidebar %}
+    {{ block.super }}
+
+{% endblock %}
+
+
+
 {{ block.super }}
 <!-- Include jQuery (if not already included by admin/base_site.html) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -13,13 +21,33 @@
 
 <!-- Custom JavaScript -->
     <script type="text/javascript">
-    // Set the current user PK in the global window object
-    // window.currentUserPK = "{{ request.user.pk }}";
-    
+      setTimeout(function (){
+        let elements = document.getElementsByClassName("float-right d-none d-sm-inline")
+        for(let i =0;i<elements.length;i++){
+            if(elements[i].innerHTML.trim()==`<b>Jazzmin version</b> 3.0.0`){
+                console.log("hello",elements[i].innerHTML.trim())
+                elements[i].innerHTML = "<b>PLM VERSION</b> 1.0.0"
+            } 
+        }
+      },1000)
+
+      setTimeout(function (){
+        let elements = document.getElementsByClassName("float-right d-none d-sm-inline")
+        for(let i =0;i<elements.length;i++){
+            if(elements[i].innerHTML.trim()==`<b>Jazzmin version</b> 3.0.0`){
+                // console.log("hello",elements[i].innerHTML.trim())
+                elements[i].innerHTML = "<b>PLM VERSION</b> 1.0.0"
+            } 
+        }
+      },3000)
+
     // Initialize Select2 on the element with ID `id_student` when the document is ready
     </script>
+
     <link rel="stylesheet" type="text/css" href="{% static 'admin/css/custom.css' %}">
 {% endblock %}
+
+
 
 
 

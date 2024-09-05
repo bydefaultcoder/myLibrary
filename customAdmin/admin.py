@@ -1,7 +1,9 @@
+from typing import Any
 from django.contrib import admin
 
 # Register your models here.
 from django.contrib.admin import AdminSite
+from django.core.handlers.wsgi import WSGIRequest
 from django.shortcuts import render
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.admin import UserAdmin
@@ -14,7 +16,8 @@ from django.urls import path
 from django.contrib.admin.models import LogEntry
 from django.utils.timezone import now
 from datetime import timedelta
-
+from django.urls import reverse, NoReverseMatch
+from django.utils.text import capfirst
 # def custom_dashboard_view(request):
 #     return render(request, 'admin/profile.html', {
 #         'user': request.user,
@@ -37,10 +40,54 @@ class MyLibraryAdminSite(AdminSite):
     def each_context(self, request):
         context = super().each_context(request)
         context['site_title'] = _(str(request.user))
-        # if request.user.:
-            # context['site_header'] = _(str(request.user.fullname))
-        # self.
         return context
+
+    
+    def get_app_list(self, request: WSGIRequest) -> list[Any]:        # Get the original app list
+        app_list = super().get_app_list(request)
+        logentry_admin_url = "/admin/recent_actions/"
+   
+
+        # Define the LogEntry model entry
+        logentry_model = {
+            'name': capfirst(_('History')),
+            'object_name': 'LogEntry',
+            'perms': {
+                'add': False,
+                'change': False,
+                'delete':  False,
+                'view': True
+            },
+            'admin_url': logentry_admin_url,
+            'add_url': None,
+        }
+
+        # Add this to an existing app (like 'Admin') or create a new app
+        # if app['name'] == 'Booking':
+        # added = False
+        studentsModel = None
+        # p = []
+        for app in app_list:
+            if app['app_label'] == 'students':
+              i = 0
+              for model in app['models']:
+                  if model['name'] == 'Students':
+                      studentsModel = model
+                      app['models'].pop(i)
+                  i = i + 1
+
+        for app in app_list:
+            # print(app)
+            if app['name'] == 'Booking':  # You can target the existing 'Admin' app
+                print("added")
+                app['models'].append(studentsModel)
+                app['models'].append(logentry_model)
+                # added = True
+            
+
+        return app_list
+
+
         
     def index(self, request, extra_context=None):
         # Use the custom user model to filter actions by the logged-in user
@@ -48,16 +95,11 @@ class MyLibraryAdminSite(AdminSite):
             user=request.user,  # request.user will be an instance of CustomUser
             action_time__gte=now() - timedelta(days=7)  # Adjust the time range as needed
         ).select_related('content_type')[:10]  # Limiting to the last 10 actions
+    
 
         extra_context = extra_context or {}
         extra_context['recent_actions'] = recent_actions
         return super().index(request, extra_context=extra_context)
-    # def get_urls(self):
-    #     urls = super().get_urls()
-    #     custom_urls = [
-    #         path('user-profile/', self.admin_view(custom_dashboard_view), name='custom_dashboard'),
-    #     ]
-    #     return custom_urls + urls
 
  
 
@@ -66,7 +108,7 @@ class MyLibraryAdminSite(AdminSite):
 class CustomUserAdmin(BaseUserAdmin):
     add_form = CustomUserCreationForm  # Use custom form for adding users
     model = CustomUser
-    list_display = ('username','fullname', 'email','image_tag', 'is_staff', 'is_superuser', 'is_active')
+    list_display = ('username','fullname', 'email','c_number','w_number','image_tag', 'is_staff', 'is_superuser', 'is_active')
     search_fields = ('email',)
     ordering = ('username',)
 
@@ -77,7 +119,7 @@ class CustomUserAdmin(BaseUserAdmin):
     image_tag.short_description = 'Image'
 
     fieldsets = (   
-        (None, {'fields': ('email', 'username','fullname','avatar','password','library_name','address','expiry_date')}),
+        (None, {'fields': ('email', 'username','fullname','c_number','w_number','avatar','password','library_name','address','expiry_date')}),
         ('Permissions', {'fields': ('is_staff', 'is_active', 'is_superuser', 'groups', 'user_permissions')}),
         # ('Important dates', {'fields': ('last_login',)}),
     )
@@ -90,7 +132,7 @@ class CustomUserAdmin(BaseUserAdmin):
     )
     filter_horizontal = ('groups', 'user_permissions')  # Enable horizontal filtering for groups and permissions
 
-    
+    # def get_c
 
     # def save_model(self, request, obj, form, change):
     #     # Only set password if it's being provided (for new users or if password is being changed)

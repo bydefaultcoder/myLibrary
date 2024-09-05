@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include,re_path, include
 from booking.views import get_seats_by_location,get_seat_available_timing,get_mothlyplans_by_user
-from customAdmin.views import display_profile,display_dashboard
+from customAdmin.views import display_profile, recent_actions
 # from customAdmin.views import CustomUserDetailView
 from customAdmin.admin import admin_site
 
@@ -27,16 +27,14 @@ from django.conf import settings
 urlpatterns = [
     # path('grappelli/', include('grappelli.urls'))
     re_path(r'^i18n/', include('django.conf.urls.i18n')),
+    
     path('admin/api-booking/get_seats_by_location/', get_seats_by_location, name='get_seats_by_location'),
     path('admin/api-booking/get_timming_by_seat/', get_seat_available_timing, name='get_timming_by_seat'),
     # path('admin/api-booking/get_mothlyplans_by_user/', get_mothlyplans_by_user, name='get_mothlyplans_by_user'),
     # path('admin/user-profile/', CustomUserDetailView.as_view(),name="user_profile"),
     path('admin/user-profile/', display_profile,name="user_profile"),
+    path('admin/recent_actions/', recent_actions, name='recent_actions'),
     # path('book/<int:pk>/', BookDetailView.as_view(), name='book_detail'),
-    path('admin/', display_dashboard),
     path('admin/', admin_site.urls),
-    # path('admin/user-profile/<int:pk>/', display_profile,name="user_profile"),
-    
-    # path('dj-admin/', admin.site.urls),
-    # path('booking/', include('booking.urls')),
+    path('api/students/', include('students.urls')),
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_DIR)+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -57,11 +57,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
-    # 'django_group_model',
-
-    # 'admin_reorder',
+    'rest_framework',
+     'rest_framework.authtoken',
+    # -------
     'customAdmin',
     'booking',
+    'students'
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
@@ -88,6 +89,13 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'customAdmin.expirymiddleware.CheckUserExpiryMiddleware',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+}
 TEMPLATES = os.path.join(BASE_DIR,"templates")
 # print(TEMPLATES)
 ROOT_URLCONF = 'myLibrary.urls'
@@ -179,7 +187,7 @@ TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
  
 
 # Static files (CSS, JavaScript, Images)
