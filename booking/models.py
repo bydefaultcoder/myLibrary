@@ -8,7 +8,7 @@ from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone as tz
 from django.core.validators import MinValueValidator,MaxLengthValidator,MinLengthValidator
-
+from  datetime import time
 
 from customAdmin.models import CustomUser
 from students.models import Student
@@ -21,8 +21,17 @@ class Location(models.Model):
         ('exposed', 'Exposed'),
         # ('suspended', 'Suspended'),
     ]
-    location_name = models.CharField(max_length=100,verbose_name="Library Name")
+    timming = [ (4,"4:00 AM Morning"), (5,"5:00 AM Morning"), (6,"6:00 AM Morning"), 
+                       (7,"7:00 AM"), (8,"8:00 AM"), (9,"9:00 AM"), (10,"10:00 AM"), 
+                       (11,"11:00 AM"), (12,"12:00 PM (noon)"), (13,"1:00 PM"), (14,"2:00 PM"), 
+                       (15,"3:00 PM"), (16,"4:00 PM"), (17,"5:00 PM"), (18,"6:00 PM"), 
+                       (19,"7:00 PM"), (20,"8:00 PM Night"), (21,"9:00 PM Night"), (22,"10:00 PM Night"), 
+                       (23,"11:00 PM Night)]"),(0,	"12:00 AM, midnight Night"), (1,"1:00 AM Night"), (2,"2:00 AM Night"), 
+                       (3,"3:00 AM Night"),]
     location_id = models.AutoField(primary_key=True, verbose_name="Library Id")
+    location_name = models.CharField(max_length=100,verbose_name="Library Name")
+    opening_time = models.PositiveIntegerField(choices=timming,verbose_name="Opening Time(leave it blank for full time)",null=True,blank=True)
+    closing_time = models.PositiveIntegerField(choices=timming,verbose_name="Closing Time(leave it blank for full time)",null=True,blank=True)
     discription = models.TextField(null=True,blank=True)
     number_of_seats = models.PositiveIntegerField(verbose_name='No of Seats')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
@@ -30,6 +39,24 @@ class Location(models.Model):
     class Meta:
         verbose_name = "library"          # Singular form
         verbose_name_plural = "libraries"  # Plural form
+    
+    def getTotalOpenTime(self):
+        closing = self.closing_time
+        opening = self.opening_time
+        totalTime = 0
+        # print(self.opening_time,self.closing_time)
+        if closing and opening:
+            # print(self.opening_time,self.closing_time,"innnnnn")
+            i = opening
+            while(i<closing):
+                totalTime+=1
+                # print(i,"before 24")
+                i+=1
+                if i>=24:
+                    print(i,"more then 24")
+                    i = i%24
+        # print(totalTime)
+        return totalTime
 
     def __str__(self):
         return f'{self.location_name}-{self.location_id}'
@@ -64,7 +91,7 @@ class Seat(models.Model):
 
     seat_id = models.AutoField(primary_key=True, verbose_name="Seat Id")
     seat_no = models.PositiveIntegerField(blank=True,null=True, verbose_name="Seat No",editable=False)
-    location = models.ForeignKey(Location, on_delete=models.CASCADE, verbose_name='Location no.')
+    location = models.ForeignKey(Location, on_delete=models.CASCADE, verbose_name='Location no.',related_name='seats')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='vacant')
     deleted = models.BooleanField(default=False,blank=None,null=False,editable=False)
     created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True,editable=False)
@@ -88,7 +115,42 @@ class Seat(models.Model):
             self.location.save()
 
     def __str__(self):
-        return 'Seat no.' +str(self.seat_id) + ' status:' + self.status 
+        print(self.bookings.count())
+        return 'Seat no.' +str(self.seat_no)
+    def filter_available_hours(self,joining_date):
+        """
+        Filter the start and end time options based on already booked slots for the seat.
+        """
+        # Get existing bookings for this seat
+        # booked_slots = Booking.objects.filter(seat=self)
+        # joining_date
+        booked_slots = self.bookings.all()
+
+        # Get all full hours from 00:00 to 23:00
+        all_hours = [time(hour=h) for h in range(24)]  # Generates times like 00:00:00, 01:00:00, ..., 23:00:00
+
+        # Initialize the list for storing unavailable hours
+        unavailable_hours = set()
+
+        # Mark unavailable hours based on existing bookings
+        for booking in booked_slots:
+            # booked_slots.payments
+            if booking.extended_date > joining_date :
+                start_hour = booking.start_time.hour
+                end_hour = booking.end_time.hour
+                # Mark all hours between the start and end times as unavailable
+                unavailable_hours.update(range(start_hour+1, end_hour))  # Include all hours between start and end
+
+        # Filter out unavailable hours to get the available ones
+        print(all_hours)
+        print(unavailable_hours)
+        available_hours = [hour for hour in all_hours if hour.hour not in unavailable_hours]
+
+        available_choices = [hour.hour for hour in available_hours]
+
+        print(available_choices)
+
+        return {"data":available_choices}
 
 @receiver(post_delete, sender=Seat)
 def update_location_on_seat_delete(sender, instance, **kwargs):
@@ -106,9 +168,10 @@ class Booking(models.Model):
         ('active', 'Active'),
         ('inactive', 'Inactive'),
     ]
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    seat = models.ForeignKey(Seat, on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE,related_name='bookings')
+    seat = models.ForeignKey(Seat, on_delete=models.CASCADE,related_name='bookings')
     booking_time = models.DateTimeField(auto_now_add=True)
+    extended_date = models.DateTimeField(null=True,blank=True)
     joining_date = None
     remain_no_of_months = None
     start_time = models.TimeField()

@@ -1,7 +1,7 @@
 from django import forms
 from .models import Location, Seat
 from django.db import transaction
-
+from django.core.exceptions import ValidationError
 class LocationUpdateForm(forms.ModelForm):
     increment_seat = forms.IntegerField(label='Increase No. of Seats', required=False, initial=0)
     existing_Seat = forms.IntegerField(label='Existing Seats', required=False, disabled=True)
@@ -17,7 +17,7 @@ class LocationUpdateForm(forms.ModelForm):
     # exclude = ()
     class Meta:
         model = Location
-        fields = ['location_name','existing_Seat','increment_seat','status','discription']
+        fields = ['location_name','existing_Seat','opening_time','closing_time','increment_seat','status','discription']
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Set the initial value of existing_copies from the instance
@@ -49,4 +49,21 @@ class LocationUpdateForm(forms.ModelForm):
 
 
 class LocationCreateForm(forms.ModelForm):
-    pass
+    def clean(self):
+        cleaned_data = super().clean()
+        # Fetching opening and closing times from the form data
+        opening_time = cleaned_data.get("opening_time")
+        closing_time = cleaned_data.get("closing_time")
+        # Check if both fields are empty or one is empty
+        # del cleaned_data['opening_time']  # it is to remove field before sending to save
+        if (opening_time or not closing_time) and (not opening_time or closing_time):
+            return cleaned_data
+        else:
+            raise ValidationError("Both opening and closing times both must be Fill or None of both.")
+
+
+           
+
+    # class Meta:
+    #     model = Location
+    #     fields = ['location_name','opening_time','closing_time','number_of_seats','status','discription']

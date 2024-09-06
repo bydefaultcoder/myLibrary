@@ -29,14 +29,13 @@ urlpatterns = [
     # path('grappelli/', include('grappelli.urls'))
     re_path(r'^i18n/', include('django.conf.urls.i18n')),
     
-    path('admin/api-booking/get_seats_by_location/', get_seats_by_location, name='get_seats_by_location'),
     path('admin/api-booking/get_timming_by_seat/', get_seat_available_timing, name='get_timming_by_seat'),
     # path('admin/api-booking/get_mothlyplans_by_user/', get_mothlyplans_by_user, name='get_mothlyplans_by_user'),
     # path('admin/user-profile/', CustomUserDetailView.as_view(),name="user_profile"),
     path('admin/user-profile/', display_profile,name="user_profile"),
     path('admin/recent_actions/', recent_actions, name='recent_actions'),
-    # path('book/<int:pk>/', BookDetailView.as_view(), name='book_detail'),
     path('admin/', admin_site.urls),
     path('api/students/', include('students.urls')),
+    path('api/get_seats_by_location/', get_seats_by_location, name='get_seats_by_location_w_date'),
     path('', homepage),
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_DIR)+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

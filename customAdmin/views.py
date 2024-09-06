@@ -7,9 +7,9 @@ from django.http import HttpResponse, HttpRequest, HttpResponseBadRequest,HttpRe
 from django.contrib.admin.views.decorators import staff_member_required
 
 from .profileform import ProfileForm
+from django.utils.timezone import now
+from datetime import timedelta
 from django.utils import timezone
-# import customAdmin
-
 from .admin import admin_site,CustomUserAdmin
 from .models import CustomUser
 # Create your views here.
@@ -82,7 +82,10 @@ from django.contrib.admin.models import LogEntry
 from django.shortcuts import render
 
 def recent_actions(request):
-    recent_logs = LogEntry.objects.all().order_by('-action_time')[:10]
+    recent_logs = LogEntry.objects.filter(
+            user=request.user,  # request.user will be an instance of CustomUser
+            action_time__gte=now() - timedelta(days=7)  # Adjust the time range as needed
+        ).select_related('content_type')[:10]  # Limiting to the last 10 actions
     context = {
          **admin_site.each_context(request),  # Include the admin site context 
          'admin_log': recent_logs

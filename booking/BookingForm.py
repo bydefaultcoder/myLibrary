@@ -19,7 +19,7 @@ class CustomBookingForm(forms.ModelForm):
     end_time = forms.ChoiceField(choices=HOUR_CHOICES, label="End Time")
     # hour_duratios =  [(0,'Custom Time')] + [(i,i) for i in [4,6,8,12,24]]
 
-    joining_date = forms.DateField(initial=tz.now(),widget=forms.DateInput(attrs={'type': 'date'}))
+    joining_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     remain_no_of_months = forms.IntegerField(min_value=1,initial=0)
     
     plan = forms.ChoiceField(choices= [],label="Plans",)
@@ -29,7 +29,7 @@ class CustomBookingForm(forms.ModelForm):
     # student = forms.ModelChoiceField(queryset=Student.objects.all(), required=False, label='student')
     class Meta:
         model = Booking
-        fields = ['student', 'location','joining_date', 'seat', 'plan','start_time', 'end_time','remain_no_of_months','discount', ]
+        fields = ['student', 'location','seat', 'plan','joining_date', 'start_time', 'end_time','remain_no_of_months','discount', ]
 
     def get_monthly_plans(self):
        
@@ -56,7 +56,7 @@ class CustomBookingForm(forms.ModelForm):
         if 'location' in self.data:
             try:
                 location_id = int(self.data.get('location'))
-                self.fields['seat'].queryset = Seat.objects.filter(location_id=location_id)
+                self.fields['seat'].queryset = Seat.objects.filter(location_id=location_id).filter(status="removed")
             except (ValueError, TypeError):
                 self.fields['seat'].queryset = Seat.objects.none()
         elif self.instance.pk:
@@ -64,6 +64,7 @@ class CustomBookingForm(forms.ModelForm):
         self.fields['start_time'].choices = self.HOUR_CHOICES
         self.fields['end_time'].choices = self.HOUR_CHOICES
         self.fields['remain_no_of_months'].initial = 1
+        
     def clean(self):
         cleaned_data = super().clean()
         print(cleaned_data,"come heredm,.jsdklfjlsadk;")

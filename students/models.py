@@ -58,6 +58,7 @@ class Student(AbstractUser):
            if not self.password:
                 self.password = make_password('password123')  # Set your default password here
            self.stu_no = Student.objects.filter(created_by=self.created_by).count()+ 1
-        self.avatar.name = self.avatar.name.replace('None',f'{self.stu_no}') 
+        if self.avatar:
+            self.avatar.name = self.avatar.name.replace('None',f'{self.stu_no}') 
 
         super().save(*args, **kwargs)

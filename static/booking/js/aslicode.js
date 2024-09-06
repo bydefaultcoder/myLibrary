@@ -1,14 +1,11 @@
 (function($) {
     $(document).ready(function() {
-        if (typeof jQuery === 'undefined') {
-            console.error('jQuery is not loaded');
-        } else {
-            console.log('jQuery is loaded');
-        }
+
         let MotnthlyPlanings =  []
         let availabletimming = []
         let start_Dropdown = $('#id_start_time');
         let end_Dropdown = $('#id_end_time');
+
 
         // $('#id_seat').select2();
         let seatDropdown = $('#id_seat');
@@ -16,43 +13,22 @@
         let hoursDropdown = $('#id_plan');
         let slectedPrize = 0
 
-        // console.log(window.currentUserPK)
-        // $.ajax({
-        //     url: '/admin/booking/get_mothlyplans_by_user/',  // URL to fetch seats
-        //     data: {
-        //         'currentUserPK': window.currentUserPK
-        //     },
-        //     success: function(response) {
-        //         // console.log(data)
-        //         MotnthlyPlanings = response["data"]
-        //         hoursDropdown.empty();
-        //         // seatDropdown.append('<option value="">Select</option>');
-        //         hoursDropdown.append('<option value="0">Select</option>');
-        //         $.each(MotnthlyPlanings, function(key, value) {
-        //             // console.log(key,value)
-        //             let hours  = value.hours
-        //             hoursDropdown.append(`<option value=${hours} onclick="selectPrize(${value.prize})" > ${value.hours} hours - monthly ${value.prize}(₹)</option>`);
-        //         });
-        //         // [{"timming_id": 4, "hours": 4, "prize": 300, "discription": "minimum", "status": "active", "created_by_id": 1}, {"timming_id": 5, "hours": 6, "prize": 500, "discription": "fix hours", "status": "active", "created_by_id": 1}]
-        //     }
-        // });
 
         function selectPrize(prize){
             console.log("prize selected")
             slectedPrize = prize
         }
         
-        // Listen for changes on the location dropdown
-        // $('#id_location').on('select2:select',function() {
-        $('#id_location').on('change',function() {
-            var locationId = $(this).val();  // Get selected location ID
+ 
+        $('#id_location').change(function() {
+            let locationId =  $(this).val();
             if (locationId) {
                 // Clear the seat dropdown
                 seatDropdown.empty();
                 console.log("hello for location")
                 // Fetch seats associated with the selected location
                 $.ajax({
-                    url: '/admin/booking/get_seats_by_location/',  // URL to fetch seats
+                    url: '/api/get_seats_by_location/',  // URL to fetch seats
                     data: {
                         'location_id': locationId
                     },
@@ -78,11 +54,11 @@
             // console.log("hello")
             console.log("hello")
             var SeatId = $(this).val();  // Get selected seat ID
-            console.log(SeatId,"3333333333333333333")
+            // console.log(SeatId,"3333333333333333333")
             if (SeatId) {
 
                 $.ajax({
-                    url: '/admin/booking/get_timming_by_seat/',  // URL to fetch seats
+                    url: '/admin/api-booking/get_timming_by_seat/',  // URL to fetch seats
                     data: {
                         'seat_id': SeatId,
                         'joining_date':$('#id_joining_date').val()

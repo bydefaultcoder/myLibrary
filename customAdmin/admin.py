@@ -89,17 +89,17 @@ class MyLibraryAdminSite(AdminSite):
 
 
         
-    def index(self, request, extra_context=None):
-        # Use the custom user model to filter actions by the logged-in user
-        recent_actions = LogEntry.objects.filter(
-            user=request.user,  # request.user will be an instance of CustomUser
-            action_time__gte=now() - timedelta(days=7)  # Adjust the time range as needed
-        ).select_related('content_type')[:10]  # Limiting to the last 10 actions
+    # def index(self, request, extra_context=None):
+    #     # Use the custom user model to filter actions by the logged-in user
+    #     recent_actions = LogEntry.objects.filter(
+    #         user=request.user,  # request.user will be an instance of CustomUser
+    #         action_time__gte=now() - timedelta(days=7)  # Adjust the time range as needed
+    #     ).select_related('content_type')[:10]  # Limiting to the last 10 actions
     
 
-        extra_context = extra_context or {}
-        extra_context['recent_actions'] = recent_actions
-        return super().index(request, extra_context=extra_context)
+    #     extra_context = extra_context or {}
+    #     extra_context['recent_actions'] = recent_actions
+    #     return super().index(request, extra_context=extra_context)
 
  
 

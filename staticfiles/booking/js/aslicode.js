@@ -1,14 +1,12 @@
 (function($) {
     $(document).ready(function() {
-        if (typeof jQuery === 'undefined') {
-            console.error('jQuery is not loaded');
-        } else {
-            console.log('jQuery is loaded');
-        }
+
         let MotnthlyPlanings =  []
         let availabletimming = []
         let start_Dropdown = $('#id_start_time');
         let end_Dropdown = $('#id_end_time');
+        console.log($('#id_location').val())
+        console.log($('#id_joining_date').val())
 
         // $('#id_seat').select2();
         let seatDropdown = $('#id_seat');
@@ -42,10 +40,11 @@
             slectedPrize = prize
         }
         
-        // Listen for changes on the location dropdown
-        // $('#id_location').on('select2:select',function() {
-        $('#id_location').on('change',function() {
-            var locationId = $(this).val();  // Get selected location ID
+ 
+        $('#id_joining_date').keypress(function() {
+            let joining_date = $(this).val();  // Get selected location ID
+            let locationId =  $('#id_location').val();  // Get selected location ID
+            console.log(joining_date,locationId)
             if (locationId) {
                 // Clear the seat dropdown
                 seatDropdown.empty();
@@ -54,7 +53,8 @@
                 $.ajax({
                     url: '/admin/api-booking/get_seats_by_location/',  // URL to fetch seats
                     data: {
-                        'location_id': locationId
+                        'location_id': locationId,
+                        'joining_date':joining_date
                     },
                     success: function(data) {
                         console.log(data)

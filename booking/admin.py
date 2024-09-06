@@ -23,23 +23,28 @@ import csv
 from django.http import HttpResponse
 logger = logging.getLogger(__name__)
 
-
+from utils.relatedToDate import format_time
 admin_site.register(Group)
 admin_site.register(CustomUser,CustomUserAdmin)
 
 class LocationAdmin(admin.ModelAdmin):
 
-    list_display = ('display_name','number_of_seats','discription',)
+    list_display = ('display_name','number_of_seats','open_closing_time','discription',)
     def display_name(self,modelObject):
         return f"{modelObject.location_name}-({modelObject.location_id})"
-
-    oldForm =  None
-    def get_form(self, request, obj=None, **kwargs):
-        if obj is not None:
-            self.form = LocationUpdateForm
+    
+    def open_closing_time(self,modelObject):
+        time = modelObject.getTotalOpenTime()
+        if time:
+            return f'from {format_time(modelObject.opening_time)} to {format_time(modelObject.closing_time)} ({time} hours)'
         else:
-            self.form = LocationCreateForm
+            return "Full day"
 
+    def get_form(self, request, obj=None, **kwargs):
+        if obj is None:
+            self.form = LocationCreateForm
+        else:
+            self.form = LocationUpdateForm
 
         return super().get_form(request, obj, **kwargs)
     
@@ -93,6 +98,7 @@ class BookingAdmin(admin.ModelAdmin):
             return f"{t-12} PM"
         else:
             return f"{t} AM"
+    
     def get_form(self, request, obj=None, **kwargs):
         # Get the form class first
         form = super().get_form(request, obj, **kwargs)
@@ -104,6 +110,14 @@ class BookingAdmin(admin.ModelAdmin):
                 super().__init__(*args, **form_kwargs)
 
         return CustomFormWithRequest
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        formfield = super().formfield_for_foreignkey(db_field, request, **kwargs)
+        if db_field.name == 'student':
+            formfield.queryset = Student.objects.filter(created_by=request.user)
+        if db_field.name == 'seat' :
+            # Filter locations based on the current user
+            formfield.queryset = Seat.objects.filter(created_by=request.user).exclude(status="removed")
+        return formfield
 
     class Media:
         css = {
@@ -176,17 +190,6 @@ class BookingAdmin(admin.ModelAdmin):
             # super().save_model(request, obj, form, change)
         else:
             logger.info("form is not valid")
-
-
-
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        formfield = super().formfield_for_foreignkey(db_field, request, **kwargs)
-        if db_field.name == 'student':
-            formfield.queryset = Student.objects.filter(created_by=request.user)
-        if db_field.name == 'seat' :
-            # Filter locations based on the current user
-            formfield.queryset = Seat.objects.filter(created_by=request.user)
-        return formfield
 
 
     # def save_model(self, request, obj, form, change):
