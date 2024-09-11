@@ -8,12 +8,12 @@ from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone as tz
 from django.core.validators import MinValueValidator,MaxLengthValidator,MinLengthValidator
-from  datetime import time
-
+from  datetime import time,timedelta
+from dateutil.relativedelta import relativedelta
 from customAdmin.models import CustomUser
 from students.models import Student
 # import calendar
- 
+from .paymentModel import Payment
 class Location(models.Model):
     STATUS_CHOICES = [
         ('active', 'Active'),
@@ -53,7 +53,7 @@ class Location(models.Model):
                 # print(i,"before 24")
                 i+=1
                 if i>=24:
-                    print(i,"more then 24")
+                    # print(i,"more then 24")
                     i = i%24
         # print(totalTime)
         return totalTime
@@ -115,9 +115,10 @@ class Seat(models.Model):
             self.location.save()
 
     def __str__(self):
-        print(self.bookings.count())
+        # print(self.bookings.count())
         return 'Seat no.' +str(self.seat_no)
-    def filter_available_hours(self,joining_date):
+    def filter_available(self,joining_date,hours,total_duration):
+        # filter_available_ac_j_h_dt_d(joining_date,hour,duration*multiple*type[planing_for])
         """
         Filter the start and end time options based on already booked slots for the seat.
         """
@@ -129,28 +130,31 @@ class Seat(models.Model):
         # Get all full hours from 00:00 to 23:00
         all_hours = [time(hour=h) for h in range(24)]  # Generates times like 00:00:00, 01:00:00, ..., 23:00:00
 
+        # print(joining_date,hours,total_duration)
+        given_date = tz.datetime.strptime(joining_date, "%Y-%m-%d")
         # Initialize the list for storing unavailable hours
         unavailable_hours = set()
 
         # Mark unavailable hours based on existing bookings
         for booking in booked_slots:
-            # booked_slots.payments
-            if booking.extended_date > joining_date :
-                start_hour = booking.start_time.hour
-                end_hour = booking.end_time.hour
-                # Mark all hours between the start and end times as unavailable
-                unavailable_hours.update(range(start_hour+1, end_hour))  # Include all hours between start and end
-
+            daystep = given_date
+            for i in range(0,total_duration):
+                daystep = daystep + timedelta(days=1)
+                # booked_slots.payments
+                # c2 -------------  c1
+                condtion1 = daystep > booking.extended_date and daystep > booking.joining_date
+                condtion2 = daystep < booking.extended_date and daystep < booking.joining_date
+                if not condtion1 and not condtion2 :
+                    start_hour = booking.start_time.hour
+                    end_hour = booking.end_time.hour
+                    # Mark all hours between the start and end times as unavailable
+                    unavailable_hours.update(range(start_hour+1, end_hour))  # Include all hours between start and end
         # Filter out unavailable hours to get the available ones
-        print(all_hours)
-        print(unavailable_hours)
+        # print(all_hours)
+        # print(unavailable_hours)
         available_hours = [hour for hour in all_hours if hour.hour not in unavailable_hours]
-
         available_choices = [hour.hour for hour in available_hours]
-
-        print(available_choices)
-
-        return {"data":available_choices}
+        return {"timming":available_choices}
 
 @receiver(post_delete, sender=Seat)
 def update_location_on_seat_delete(sender, instance, **kwargs):
@@ -161,56 +165,79 @@ def update_location_on_seat_delete(sender, instance, **kwargs):
 
 class Booking(models.Model):
     location = None
-    plan = None
+    plan = ""
     discount = None
-    total_amount = None
+    total_amount_to_pay = 0
+    duration = 0
     STATUS_CHOICES = [
         ('active', 'Active'),
         ('inactive', 'Inactive'),
     ]
-    student = models.ForeignKey(Student, on_delete=models.CASCADE,related_name='bookings')
-    seat = models.ForeignKey(Seat, on_delete=models.CASCADE,related_name='bookings')
-    booking_time = models.DateTimeField(auto_now_add=True)
-    extended_date = models.DateTimeField(null=True,blank=True)
-    joining_date = None
-    remain_no_of_months = None
-    start_time = models.TimeField()
-    end_time = models.TimeField()
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active',blank=False,null=False,editable=False)
-    duration = models.DurationField( default=tz.timedelta(days=30))
-    created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True,editable=False)
+    student = models.ForeignKey(Student,on_delete=models.PROTECT , related_name='bookings') # getting
+    seat = models.ForeignKey(Seat, on_delete=models.CASCADE,related_name='bookings') # getiing
+    booking_time = models.DateTimeField(auto_now_add=True) # no issue
+    extended_date = models.DateTimeField(null=True,blank=True) # solved
+    joining_date = models.DateTimeField(null=True,blank=True) # getting
+    start_time = models.TimeField() # getting
+    end_time = models.TimeField() # getting
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active',blank=False,null=False,editable=False) # no issue
+    created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True,editable=False) # no issue
     class Meta:
         verbose_name = "Seat Booking"          # Singular form
         verbose_name_plural = "Seat Bookings"  # Plural form
-
+    @transaction.atomic
     def save(self, *args, **kwargs) -> None:
         seat = self.seat
         student = self.student
         student.status = 'alloted'
         seat.status = 'engaged'
-        print(kwargs,args)
+        print("heiiiiiiiiiiiii")
+        splited_plan = self.plan.split("_")
+        if splited_plan[2]=="d":
+            delta = relativedelta(days=int(splited_plan[3])*self.duration)
+        if splited_plan[2]=="w":
+            delta = relativedelta(weeks=int(splited_plan[3])*self.duration)
+        if splited_plan[2]=="m":
+            delta = relativedelta(months=int(splited_plan[3])*self.duration)
+        else :
+            delta = relativedelta(days=0)
 
-        amount = int(self.plan.split("_")[1]) * int(self.remain_no_of_months)
-        print(self.pk,"pk here 156" ,self.pk is None,self.pk==None)
+        self.extended_date = self.joining_date +delta
+# {'student': <Student: Samarjeet Singh Gautam (enrolled)>, 'location': <Location: studento-2>, 
+# 'joining_date': datetime.date(2024, 9, 17), 'plan': '6_600_m_1', 'duration': 1, 'seat_finder': '', 
+# 'seat': <Seat: Seat no.4>, 'start_time': '09:00:00', 'end_time': '15:00:00', 'discount': 0.0, 'total_amount': 600.0}
+        amount = int(self.plan.split("_")[1]) * self.duration
+        # print(self.pk,"pk here 156" ,self.pk is None,self.pk==None)
         if self.pk is None:
             try:
                 with transaction.atomic():
-                    print("hello")
+                    # print("hello")
                     seat.save()
                     student.save()
+                    
+                    payment = Payment.objects.create(
+                        payment_type = "seat_book",
+                        creditorstudent = self.student, # credituser or creditorstudent
+                        debitoruser= self.created_by,
+                    #  razorpay_payment_id razorpay_order_id razorpay_signature 
+                        amount = amount,
+                        paid_amount = self.total_amount_to_pay,
+                        discount = self.discount,
+                        status = "success"
+                    )
                     super().save(*args, **kwargs)
-                    Payment.objects.create(booking=self,
-                                           amount = amount,
-                                           paid_amount=self.total_amount,
-                                           discount=self.discount,
-                                           joining_date = self.joining_date,
-                                           remain_no_of_months = self.remain_no_of_months,
-                                           created_by=self.created_by)
+                    BookingPayment.objects.create(
+                        booking=self,
+                        payment=payment
+                    )
             except Exception as e:
                 print("Error.." ,e)
-
+        # super().save(*args, **kwargs)
     def __str__(self):
         return f'name: {self.student.first_name} {self.student.last_name}  Library:{self.seat.location.location_id} - seat no: {self.seat.seat_id} - ({self.status})'
+class BookingPayment(models.Model):
+    booking = models.ForeignKey(Booking,on_delete=models.CASCADE,related_name="booking_payments")  # Reference to Booking
+    payment = models.ForeignKey(Payment,on_delete=models.CASCADE,related_name="bookings")  # Reference to Payment
 
 @receiver(post_delete,sender=Booking)
 @transaction.atomic
@@ -253,27 +280,14 @@ class MonthlyPlan(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active',editable=False)
     created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL ,null= True,blank=False,editable=False)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['hours', 'planing_for', 'duration', 'prize'], name='unique_plan')
+        ]
+
     def __str__(self):
         return f'cost {self.prize} 1 month in rupee{self.prize}'
     class Meta:
         verbose_name = "Monthly Plan"          # Singular form
         verbose_name_plural = "Monthly Plans"  # Plural form
 
-
-class Payment(models.Model):
-    payment_id = models.AutoField(primary_key=True, verbose_name="Location No")
-    
-    booking = models.ForeignKey(Booking, on_delete=models.CASCADE,related_name='payments')
-    amount = models.DecimalField( decimal_places=2,max_digits=6,verbose_name='Amount (₹)',validators=[MinValueValidator(1)])
-    paid_amount = models.DecimalField( decimal_places=2,max_digits=6,verbose_name='Paid Amount (₹)',validators=[MinValueValidator(1)])
-    discount = models.DecimalField(decimal_places=2,max_digits=6,verbose_name='Discount (in %)',validators=[MinValueValidator(100)])
-    payment_time = models.DateTimeField(auto_now_add=True)
-    joining_date = models.DateField(blank=False,null=False, verbose_name="Joining from",default=tz.now)
-    remain_no_of_months = models.PositiveIntegerField(default=1,verbose_name="No. of Months",validators=[MinValueValidator(1)])
-    created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL ,null= True,blank=False,editable=False)
-    class Meta:
-        verbose_name = "Payment"          # Singular form
-        verbose_name_plural = "Payments"  # Plural form
-
-    def __str__(self):
-        return f'Bookingid:{self.booking.pk},{self.paid_amount},monthAdded:{self.remain_no_of_months}'

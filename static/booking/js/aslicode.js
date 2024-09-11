@@ -1,78 +1,107 @@
 (function($) {
     $(document).ready(function() {
 
+        $("#id_seat").attr('disabled', 'disabled');
+        $("#id_start_time").attr('disabled', 'disabled');
+        $("#id_discount").attr('disabled', 'disabled');
+        $("#id_total_amount_to_pay").attr('disabled', 'disabled');
+
         let MotnthlyPlanings =  []
         let availabletimming = []
         let start_Dropdown = $('#id_start_time');
         let end_Dropdown = $('#id_end_time');
-
+        let forEndValueKeyTime = {}
 
         // $('#id_seat').select2();
         let seatDropdown = $('#id_seat');
+        console.log("Every thing is loaded------------------------")
 
         let hoursDropdown = $('#id_plan');
         let slectedPrize = 0
-
+        // let op = $('select2-id_location-container').val()
+        // console.log(op)
 
         function selectPrize(prize){
             console.log("prize selected")
             slectedPrize = prize
         }
-        
- 
-        $('#id_location').change(function() {
-            let locationId =  $(this).val();
-            if (locationId) {
-                // Clear the seat dropdown
-                seatDropdown.empty();
-                console.log("hello for location")
-                // Fetch seats associated with the selected location
-                $.ajax({
-                    url: '/api/get_seats_by_location/',  // URL to fetch seats
-                    data: {
-                        'location_id': locationId
-                    },
-                    success: function(data) {
-                        console.log(data)
-                        seatDropdown.append('<option value="">Select</option>');
-                        $.each(data, function(key, value) {
-                            seatDropdown.append('<option value="' + key + '">' + value + '</option>');
-                        });
-                    }
-                });
-            } else {
-                seatDropdown.empty();
-                seatDropdown.append('<option value="">---------</option>');
+        let seat_data = {}
+        function getSeats() {
+            // to get location
+            let locationId =  $("#id_location").val();
+            console.log(locationId)
+            if(!locationId){    
+                alert("Please Select Library...")
+                return
             }
-        });
+            let joining_date = $('#id_joining_date').val()
+            if(!joining_date){
+                alert("Please Select Joining Date ...")
+                return
+            }
+            let plan = $('#id_plan').val()
+            if(!plan){
+                alert("Please Select Plan ...")
+                return
+            }
+            let duration = $('#id_duration').val()
+            if(!duration){
+                alert("Please Select Duration ...")
+                return
+            }
+            let dataToSend = {
+                'location_id':locationId,
+                'joining_date': joining_date,
+                'plan' : plan,
+                'multiple' : duration,
+                'csrfmiddlewaretoken': $('input[name="csrfmiddlewaretoken"]').val()
+            }
+        
+                // Clear the seat dropdown
+            seatDropdown.empty();
+            console.log(dataToSend,"hello for location")
+            // Fetch seats associated with the selected location
+            $.ajax({
+                url: '/api/get_seats/',  // URL to fetch seats
+                type: 'POST',  // Change the request method to POST
+                data: dataToSend,
+                success: function(data) {
+                    console.log(data)
+                    seat_data = data
+                    seatDropdown.append('<option value="">Select</option>');
+                    $("#id_total_amount_to_pay").val( parseInt(plan.split("_")[1])*parseInt(duration))
+                    $.each(data, function(key,value) {
+                        console.log(value,key)
+                        seatDropdown.append('<option value="' + key + '">' + value[0] + '</option>');
+                        // $("#id_seat").attr('disabled', 'disabled');
+                        $("#id_seat").removeAttr('disabled');
+                    });
+                    calculateAmount()
+                }
+            });
+
+        }
+        $('#seat_finder').on('click',getSeats)
+
+        
         console.log("javascript here")
-        // -------------------for timming
-// Event handler for seat selection
-// Event handler for seat selection
-        // $('#id_seat').on('select2:select',function() {
-        $('#id_seat').on('change',function() {
+        // $('#id_seat').on('change',
+        onSelectChange(document.getElementById("select2-id_seat-container"),function() {
             // console.log("hello")
             console.log("hello")
-            var SeatId = $(this).val();  // Get selected seat ID
-            // console.log(SeatId,"3333333333333333333")
-            if (SeatId) {
-
-                $.ajax({
-                    url: '/admin/api-booking/get_timming_by_seat/',  // URL to fetch seats
-                    data: {
-                        'seat_id': SeatId,
-                        'joining_date':$('#id_joining_date').val()
-                    },
-                    success: function(data) {
-                        console.log(data)
-                        availabletimming = data["data"]
+            let seat_id =  $("#id_seat").val();
+            if (seat_id) {
+                        console.log(seat_data[seat_id][1])
+                        hours =parseInt( $('#id_plan').val().split("_")[0])
+                        availabletimming = getAvailableTimmig(seat_data[seat_id][1],hours)
                         updateStart(availabletimming)
-                        // updateEnd(data)
                         end_Dropdown.empty();
                         end_Dropdown.append('<option value="">---------</option>');
-                    }
-                });
-            } else {
+                        $("#id_start_time").removeAttr('disabled');
+                        $("#id_discount").removeAttr('disabled');
+                        $("#id_total_amount_to_pay").removeAttr('disabled');
+                    
+                } else {
                         availabletimming = []
                         start_Dropdown.empty();
                         start_Dropdown.append('<option value="">---------</option>');
@@ -80,109 +109,68 @@
                         end_Dropdown.empty();
                         end_Dropdown.append('<option value="">---------</option>');
                     }
-        });
+        })
 
-        $('#id_start_time').on('change',function(){
-        // $('#id_start_time').on('select2:select',function(){
-            if(!$(this).val()){
-                return
-            }
+        onSelectChange(document.getElementById("select2-id_start_time-container"),
+            function(){
             console.log("hello clicked on id_start_time ");
-            let timeAfter = parseInt($(this).val().split(":")[0]);  // Get selected time
-            console.log(timeAfter,"line 73")
+            let timeAfter = parseInt($("#id_start_time").val());  // Get selected time
             let hours = parseInt($('#id_plan').val().split("_")[0]);
             console.log(hours)
-            if(hours==0){
-                let new_timming_available = getAvailableTimmig(availabletimming,timeAfter)//work here..........
-                if(!new_timming_available.length){
-                    alert("no time available")
-                }
-                updateEnd(new_timming_available)
-                console.log("value set")
-            }else{
-                const t = parseInt(timeAfter) + parseInt(hours)
+            const t = parseInt(timeAfter) + parseInt(hours)
+            if(timeAfter){
                 end_Dropdown.empty();
                 end_Dropdown.append(`<option value="${correctIt(t%24)}:00:00" selected> ${timeDescription(t%24)} </option>`);
-                console.log("disabled")
-            }       
-        })
-
-        // $('#id_plan').on('select2:select',function(){
-        $('#id_plan').on('change',function(){
-            let hour = parseInt($(this).val().split("_")[0]);
-            if(hour==0) return;
-            let timmings = [];
-            availabletimming.forEach( function(e,_,array){
-
-                if(isValidTime(array,e,hour)){   
-                        timmings.push(e)
-                }
-            })
-            console.log(timmings)
-            if(timmings.length<1){
-                alert("Duration Not Possible")
-                start_Dropdown.removeAttr("selected");
-                end_Dropdown.removeAttr("selected");
-                calculateAmount()
-                return;
             }
-            start_Dropdown.empty();
-            start_Dropdown.append('<option value="">Select</option>');
-            // let get_selected_value = start_Dropdown.val()
-            // for(let i=0;i<hour_to_select - hour;i++){
-            console.log("calculating....")
-            calculateAmount()
-            timmings.forEach(startT => {
-                let end = (parseInt(startT) + parseInt(hour))%24
-                end_Dropdown.empty();
-                end_Dropdown.append(`<option value="${correctIt(end)}:00:00" selected> ${timeDescription(end%24)} </option>`);
-                start_Dropdown.append(`<option value="${correctIt(startT)}:00:00" selected>${timeDescription(startT % 24)}</option>`);  
-            });
-
+            console.log("disabled") 
         })
-        // console.log($('#id_discount').val())
+
         $('#id_discount').val(0)
-        $('#id_remain_no_of_months').on('keyup', function() {calculateAmount()});
         $('#id_discount').on('keyup',function(){calculateAmount()});
         let totalAmountTOpay = 0
         function calculateAmount(){
-            console.log("calculating")
-            let months = $('#id_remain_no_of_months')
-            let discount = $('#id_discount').val()
-            let no_of_months = months.val()
+            console.log("calculating total amount ......")
+
+            let duration = $('#id_duration').val()
+            if(!duration){
+                alert("Please Select Duration ...")
+                // just reload
+            }
             slectedPrize = 0
             if($('#id_plan').val()){
                 slectedPrize = parseFloat($('#id_plan').val().split("_")[1])
             }
+            let discount = $('#id_discount').val()
+            
+            if(!discount){
+                discount = 0
+            }
 
-            if(!discount){
-                discount = 0
-            }
-            // id_remain_no_of_months
-            console.log(slectedPrize,no_of_months,discount)
-            // if(slectedPrize>0 && no_of_months){
-            if(!selectPrize){
-                selectPrize = 0
-            }
-            if(!no_of_months){
-                no_of_months = 0
-            }
-            if(!discount){
-                discount = 0
-            }
-            totalAmountTOpay = no_of_months*slectedPrize *(100-discount)/100
+            totalAmountTOpay = parseInt(duration) * slectedPrize *(100-parseInt(discount))/100
             console.log(totalAmountTOpay)
-            // $('#id_total_amount').prop('disabled', false);
-            $('#id_total_amount').val(totalAmountTOpay)
-                // $('#id_total_amount').prop('disabled', true);
-            // }
+            $('#id_total_amount_to_pay').val(totalAmountTOpay)
         }
+
+
+        function onSelectChange(targetNode,task){
+
+            var observer = new MutationObserver(function(mutationsList, observer) {
+                task()
+            });
+            var config = { childList: true, attributes: true, subtree: true }
+    
+            observer.observe(targetNode, config);
+        }
+
+
+
+
         let total_amount_flag = true
-        $('#id_total_amount').prop('disabled', total_amount_flag);
+        // $('#id_total_amount_to_pay').prop('disabled', total_amount_flag);
         $('#total_amount_type').on('click',function(){
             console.log("cliccked on totoamount type")
             total_amount_flag = !total_amount_flag
-            $('#id_total_amount').prop('disabled', total_amount_flag);
+            $('#id_total_amount_to_pay').prop('disabled', total_amount_flag);
             if(total_amount_flag){
                 $(this).text('Click to pay manual amount');
             }else{
@@ -193,9 +181,9 @@
 
 
 
-
+        
         function getAvailableTimmig(timmings,selectedTime){
-            console.log(timmings)
+            console.log(timmings,selectedTime)
             let timminingLength = timmings.length
             let selected = selectedTime
             let privious = selectedTime
@@ -226,6 +214,7 @@
             start_Dropdown.empty();
             start_Dropdown.append('<option value="">Select</option>');
             $.each(data, function(inedx,value) {
+                forEndValueKeyTime[timeDescription(value%24)] = `${correctIt(value)}`
                 start_Dropdown.append(`<option value="${correctIt(value)}:00:00" >${timeDescription(value%24)}</option>`);
             });
         }
@@ -301,10 +290,12 @@
 
 
         $('#booking_form').submit(function(){
-            $("#id_total_amount").removeAttr('disabled');
+            $("#id_total_amount_to_pay").removeAttr('disabled');
+            $("#id_end_time").removeAttr('disabled');
         });
 
         });    
+        
 
 })(django.jQuery);
 

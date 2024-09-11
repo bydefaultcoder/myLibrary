@@ -9,6 +9,8 @@
         console.log($('#id_joining_date').val())
 
         // $('#id_seat').select2();
+        
+        console.log("Every thing is loaded++++++++++++++++++++++++++++++++")
         let seatDropdown = $('#id_seat');
 
         let hoursDropdown = $('#id_plan');
@@ -40,7 +42,7 @@
             slectedPrize = prize
         }
         
- 
+        let seat_data
         $('#id_joining_date').keypress(function() {
             let joining_date = $(this).val();  // Get selected location ID
             let locationId =  $('#id_location').val();  // Get selected location ID
@@ -57,10 +59,11 @@
                         'joining_date':joining_date
                     },
                     success: function(data) {
+                        seat_data = data
                         console.log(data)
                         seatDropdown.append('<option value="">Select</option>');
-                        $.each(data, function(key, value) {
-                            seatDropdown.append('<option value="' + key + '">' + value + '</option>');
+                        $.each(data, function(value, key) {
+                            seatDropdown.append('<option value="' + value + '">' + value + '</option>');
                         });
                     }
                 });

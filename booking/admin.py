@@ -64,7 +64,7 @@ class LocationAdmin(admin.ModelAdmin):
 # @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
     # list_display = ('Studnt_Name', 'Seat_no', 'booking_time', 'timming', 'duration',)
-    list_display = ('Studnt_Name', 'Seat_no', 'booking_time', 'timming','days_to_expire')
+    list_display = ('Studnt_Name', 'Seat_no', 'booking_time')
     list_filter = ('status',)
     search_fields = ('getStuName', 'seat')
     form = CustomBookingForm
@@ -132,7 +132,7 @@ class BookingAdmin(admin.ModelAdmin):
             'booking/js/booking_admin.js',  # Your custom JavaScript file
         )
     def Studnt_Name(self,modelObject):
-        return modelObject.student.name
+        return modelObject.student.getfullname()
 
     def Seat_no(self,modelObject):
         return modelObject.seat.seat_no
@@ -176,11 +176,15 @@ class BookingAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         if form.is_valid():
         # Attach extra fields to the model instance
+                        #
+                        # paid_amount = self.total_amount_to_pay,
+                        # discount = self.discount,
+                        # status = "Success"
             obj.location = form.cleaned_data.get('location')
             obj.discount = form.cleaned_data.get('discount')
             obj.plan = form.cleaned_data.get('plan')
-            obj.total_amount = form.cleaned_data.get('total_amount')
-            obj.remain_no_of_months = form.cleaned_data.get('remain_no_of_months')
+            obj.total_amount_to_pay = form.cleaned_data.get('total_amount_to_pay')
+            obj.duration = form.cleaned_data.get('duration')
             # print(tz.datetime(form.cleaned_data.get('joining_date')))
             obj.joining_date = form.cleaned_data.get('joining_date')
             logger.info(msg=f"{obj} hello line no 63")
@@ -283,22 +287,23 @@ class MonthlyPlanAdmin(admin.ModelAdmin):
             obj.created_by = request.user
         obj.save()
 class PaymentsAdmin(admin.ModelAdmin):
-    list_display = ('booking', 'amount','paid_amount','discount','payment_time')
-    list_filter = ('booking','paid_amount',)
-    search_fields = ('payment_time',)
-    def get_queryset(self, request):
-        # Only show objects created by the current user
-        qs = super().get_queryset(request)
-        if request.user.is_superuser:
-            return qs
-        return qs.filter(created_by=request.user)
+    # list_display = ('booking', 'amount','paid_amount','discount','payment_time')
+    # list_filter = ('booking','paid_amount',)
+    # search_fields = ('payment_time',)
+    # def get_queryset(self, request):
+    #     # Only show objects created by the current user
+    #     qs = super().get_queryset(request)
+    #     if request.user.is_superuser:
+    #         return qs
+    #     return qs.filter(created_by=request.user)
     
-    def save_model(self, request, obj, form, change):
-        if not change:  # If the object is being created
-            # obj.seat_no = Seat.objects.filter(location=obj.location).count()+ 1
-            # print("hello here is seat no" ,obj.seat_no)
-            obj.created_by = request.user
-        obj.save()
+    # def save_model(self, request, obj, form, change):
+    #     if not change:  # If the object is being created
+    #         # obj.seat_no = Seat.objects.filter(location=obj.location).count()+ 1
+    #         # print("hello here is seat no" ,obj.seat_no)
+    #         obj.debitor = request.user
+    #     obj.save()
+    pass
 
 admin_site.register(Payment,PaymentsAdmin)
 admin_site.register(MonthlyPlan,MonthlyPlanAdmin)
