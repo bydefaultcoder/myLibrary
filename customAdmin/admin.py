@@ -81,7 +81,7 @@ class MyLibraryAdminSite(AdminSite):
             if app['name'] == 'Booking':  # You can target the existing 'Admin' app
                 print("added")
                 app['models'].append(studentsModel)
-                app['models'].append(logentry_model)
+                # app['models'].append(logentry_model)
                 # added = True
             
 

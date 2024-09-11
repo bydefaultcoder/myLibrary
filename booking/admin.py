@@ -64,33 +64,43 @@ class LocationAdmin(admin.ModelAdmin):
 # @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
     # list_display = ('Studnt_Name', 'Seat_no', 'booking_time', 'timming', 'duration',)
-    list_display = ('Studnt_Name', 'Seat_no', 'booking_time')
+    list_display = ('Studnt_Name', 'booking_id','Seat_no_w_lib', 'booking_time','active_hour','joining_date_wr','valid_till')
     list_filter = ('status',)
     search_fields = ('getStuName', 'seat')
     form = CustomBookingForm
 
     actions = ['custom_bulk_delete']
+    def Seat_no_w_lib(self,modelObject):
+        return f"Library:{modelObject.seat.location.location_name}  seatNo: {modelObject.seat.seat_no}"
+    def booking_id(self,modelObject):
+        return modelObject.pk
+    def active_hour(self,modelObject):
+        hours = modelObject.end_time.hour - modelObject.start_time.hour
+        return  f"{modelObject.start_time.strftime("%I%p")} to {modelObject.end_time.strftime("%I%p")} for({hours})"
+    def joining_date_wr(self,modelObject):
+        today = tz.now()
+        rem_day = modelObject.joining_date - today
+        if rem_day.days >0:
+            return f"{modelObject.joining_date.date().strftime('%d %b %Y')} ({rem_day.days} days to join)"
+        if rem_day.days ==0:
+           return f"{modelObject.joining_date.date().strftime('%d %b %Y')} (Joining today)"
+        return f"{modelObject.joining_date.date().strftime('%d %b %Y')}"
 
     def timming(self,modelObject):
         return f"{self.convertToReadableTimeing(f"{modelObject.start_time}")} to {self.convertToReadableTimeing(f"{modelObject.end_time}")}"
 
-    def days_to_expire(self,modelObject):
-        objects  = Payment.objects.filter(booking=modelObject.pk)
-        # currentMonthObj = None
-        for obj in objects:
-            print(obj.joining_date,obj.remain_no_of_months)
-            commingdate = obj.joining_date + relativedelta(months=obj.remain_no_of_months)
-            days_remain = commingdate - tz.now().date()
-            if obj.joining_date <= tz.now().date():
-               if  days_remain.days <0:
-                   return "Expired"
-               elif days_remain.days ==0:
-                   return "Expiring today"
-               else:
-                   return f"{days_remain.days} days to expire"
-        # commingdate = objects.latest('pk').joining_date + relativedelta(months=0)
-        rem_day = objects.latest('pk').joining_date - tz.now().date() 
-        return f'{rem_day.days} days to join (for {obj.remain_no_of_months} month)'
+    def valid_till(self,modelObject):
+        today = tz.now()
+        rem_day = modelObject.extended_date - today
+        startedIn = modelObject.joining_date - today
+        if startedIn.days>=0:
+            fordays = modelObject.joining_date - modelObject.extended_date
+            return f'{modelObject.extended_date.date().strftime('%d %b %Y')} (for {fordays.days})'
+
+        if rem_day.days >0:
+            return f'{modelObject.extended_date.date().strftime('%d %b %Y')}(will expire in rem_day.days)'
+        if rem_day.days >0:
+            return f'{modelObject.extended_date.date().strftime('%d %b %Y')}(will expire in rem_day.days)'
     
     def convertToReadableTimeing(self,time_str):
         t = int(time_str.split(":")[0])
@@ -290,12 +300,12 @@ class PaymentsAdmin(admin.ModelAdmin):
     # list_display = ('booking', 'amount','paid_amount','discount','payment_time')
     # list_filter = ('booking','paid_amount',)
     # search_fields = ('payment_time',)
-    # def get_queryset(self, request):
-    #     # Only show objects created by the current user
-    #     qs = super().get_queryset(request)
-    #     if request.user.is_superuser:
-    #         return qs
-    #     return qs.filter(created_by=request.user)
+    def get_queryset(self, request):
+        # Only show objects created by the current user
+        qs = super().get_queryset(request)
+        # if request.user.is_superuser:
+        #     return qs
+        return qs.filter(debitoruser=request.user)
     
     # def save_model(self, request, obj, form, change):
     #     if not change:  # If the object is being created
