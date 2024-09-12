@@ -173,8 +173,13 @@ class Booking(models.Model):
         ('active', 'Active'),
         ('inactive', 'Inactive'),
     ]
+    TIMMING_CHOICES = [
+        ('full', 'Full Day'),
+        ('custom', 'Custom timming'),
+    ]
     student = models.ForeignKey(Student,on_delete=models.PROTECT , related_name='bookings') # getting
     seat = models.ForeignKey(Seat, on_delete=models.CASCADE,related_name='bookings') # getiing
+    timming = models.CharField(choices=TIMMING_CHOICES,default="full",max_length=10)
     booking_time = models.DateTimeField(auto_now_add=True) # no issue
     extended_date = models.DateTimeField(null=True,blank=True) # solved
     joining_date = models.DateTimeField(null=True,blank=True) # getting

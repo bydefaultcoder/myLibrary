@@ -37,10 +37,10 @@ class MyLibraryAdminSite(AdminSite):
     index_title = _('Site administration')
     
 
-    # def each_context(self, request):
-    #     context = super().each_context(request)
-    #     context['site_title'] = _(str(request.user))
-    #     return context
+    def each_context(self, request):
+        context = super().each_context(request)
+        context['site_title'] = _(str(request.user))
+        return context
 
     
     def get_app_list(self, request: WSGIRequest) -> list[Any]:        # Get the original app list
