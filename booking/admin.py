@@ -132,13 +132,13 @@ class BookingAdmin(admin.ModelAdmin):
     class Media:
         css = {
             'all': (
-                'https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.2/dist/css/select2.min.css',
+                # 'https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.2/dist/css/select2.min.css',
                 # Include any additional CSS files here
             )
         }
         js = (
-            'https://code.jquery.com/jquery-3.6.0.min.js',  # jQuery library
-            'https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.2/dist/js/select2.min.js',  # Select2 library
+            # 'https://code.jquery.com/jquery-3.6.0.min.js',  # jQuery library
+            # 'https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.2/dist/js/select2.min.js',  # Select2 library
             'booking/js/booking_admin.js',  # Your custom JavaScript file
         )
     def Studnt_Name(self,modelObject):
