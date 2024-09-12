@@ -37,10 +37,10 @@ class MyLibraryAdminSite(AdminSite):
     index_title = _('Site administration')
     
 
-    def each_context(self, request):
-        context = super().each_context(request)
-        context['site_title'] = _(str(request.user))
-        return context
+    # def each_context(self, request):
+    #     context = super().each_context(request)
+    #     context['site_title'] = _(str(request.user))
+    #     return context
 
     
     def get_app_list(self, request: WSGIRequest) -> list[Any]:        # Get the original app list
@@ -86,6 +86,8 @@ class MyLibraryAdminSite(AdminSite):
             
 
         return app_list
+    
+
 
 
         
@@ -144,6 +146,13 @@ class CustomUserAdmin(BaseUserAdmin):
     #             obj.set_password(password)
             
     #     super().save_model(request, obj, form, change)
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+            # Check if this is a popup
+            if "_popup=1" in request.GET:
+                extra_context = extra_context or {}
+                extra_context['is_popup'] = True
+
+            return super().change_view(request, object_id, form_url, extra_context=extra_context)
 
 admin_site = MyLibraryAdminSite()
 

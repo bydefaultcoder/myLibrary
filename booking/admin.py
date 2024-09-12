@@ -313,7 +313,7 @@ class PaymentsAdmin(admin.ModelAdmin):
     #         # print("hello here is seat no" ,obj.seat_no)
     #         obj.debitor = request.user
     #     obj.save()
-    pass
+    # pass
 
 admin_site.register(Payment,PaymentsAdmin)
 admin_site.register(MonthlyPlan,MonthlyPlanAdmin)
