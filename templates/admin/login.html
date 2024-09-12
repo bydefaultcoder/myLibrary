@@ -1,0 +1,37 @@
+{% extends "admin/login.html" %}
+{% block extrahead %}
+    <style>
+        {{ block.super }}
+        .responsive-img {
+            width: 50%;
+            height: auto;
+            max-width: 300px; /* You can adjust the maximum size */
+            {% comment %} display: block; {% endcomment %}
+            {% comment %} margin: 0 auto; /* Centering the image */ {% endcomment %}
+        }
+        
+        @media (min-width: 768px) {
+            {% comment %} .responsive-img {
+                max-width: 50px; /* Adjust size for larger screens */
+            } {% endcomment %}
+            img {
+                width:400px
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            {% comment %} .responsive-img {
+                max-width: 70px; /* Adjust size for larger screens like laptops or desktops */
+            } {% endcomment %}
+
+        }
+        img {
+            width:368px
+        }
+
+    </style>
+{% endblock %}
+{% block content %}
+ {{block.super}}
+
+{% endblock %}
