@@ -2,10 +2,6 @@
 {% load static %}
 {% block extrahead %}
 
-{% block sidebar %}
-    {{ block.super }}
-
-{% endblock %}
 
 
 
@@ -22,6 +18,13 @@
 <!-- Custom JavaScript -->
     <script type="text/javascript">
       setTimeout(function (){
+        $(document).ready(function() {
+            if (window.location.search.indexOf('_popup=1') !== -1) {
+                // Hide elements that shouldn't be in the popup
+                $('#sidebar').hide();
+                $('#header').hide();
+            }
+        });
         let elements = document.getElementsByClassName("float-right d-none d-sm-inline")
         for(let i =0;i<elements.length;i++){
             if(elements[i].innerHTML.trim()==`<b>Jazzmin version</b> 3.0.0`){
@@ -30,6 +33,14 @@
             } 
         }
       },1000)
+
+        $(document).ready(function() {
+        if (window.location.search.indexOf('_popup=1') !== -1) {
+            // Hide elements that shouldn't be in the popup
+            $('#sidebar').hide();
+            $('#header').hide();
+        }
+    });
 
       setTimeout(function (){
         let elements = document.getElementsByClassName("float-right d-none d-sm-inline")
@@ -41,6 +52,8 @@
         }
       },3000)
 
+
+
     // Initialize Select2 on the element with ID `id_student` when the document is ready
     </script>
 
@@ -51,4 +64,12 @@
 
 
 
+{% if is_popup %}
+<!-- Popup-specific layout here -->
+{% else %}
+{% block sidebar %}
+    {{ block.super }}
+
+{% endblock %}
+{% endif %}
 
