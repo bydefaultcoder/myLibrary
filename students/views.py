@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 from .models import Student
-from .serializers import StudentRegistrationSerializer, LoginSerializer
+from .authserializers import StudentRegistrationSerializer, LoginSerializer
 
 class RegisterAPIView(generics.CreateAPIView):
     queryset = Student.objects.all()

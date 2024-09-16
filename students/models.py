@@ -61,7 +61,7 @@ class Student(CustomUser):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='enrolled',editable=False)
     created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL,default=1, null=True, blank=True,editable=False,related_name="students")
     REQUIRED_FIELDS = ['phone_no', 'first_name', 'last_name',]
-    USERNAME_FIELD = 'phone_no'
+    USERNAME_FIELD = 'email'
 
     class Meta:
         verbose_name = "Student"          # Singular form
@@ -75,10 +75,11 @@ class Student(CustomUser):
     def save(self, *args, **kwargs):
         # Check if the status has changed
         print(self.is_staff,self.is_superuser,"hellossssssssssssssssssssssss")
-        self.first_name
-        if self.pk:
+        self.username = self.email
+        if not self.pk:
            if self.password and self.created_by.pk==1:
-                self.password = make_password(self.password)  # Set your default password here
+               pass
+                # self.password = make_password(self.password)  # Set your default password here
            else:
                 self.password = make_password(f"{self.phone_no}@{self.last_name}")  # Set your default password here
         else:        

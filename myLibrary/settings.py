@@ -147,7 +147,7 @@ else :
 DATABASES = {  
         'default': {  
             'ENGINE': 'django.db.backends.mysql',  
-            'NAME': 'library_manager',  
+            'NAME': 'library_man',  
             'USER': dbuser,  
             'PASSWORD': PASSWORD,  
             'HOST': 'localhost',  

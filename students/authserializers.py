@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Student
 from django.contrib.auth import authenticate
-
+from django.contrib.auth.hashers import make_password
 class StudentRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
@@ -35,7 +35,7 @@ class StudentRegistrationSerializer(serializers.ModelSerializer):
         return user
 
 class LoginSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+    email = serializers.CharField()
     password = serializers.CharField(write_only=True)
 
     def validate(self, data):
@@ -43,10 +43,16 @@ class LoginSerializer(serializers.Serializer):
         password = data.get('password')
 
         if email and password:
-            user = authenticate(username=email, password=password)
+            print(email,password)
+            passw = password  # Set your default password here
+            user = Student.objects.get(email=email)
+            print(user)
             if user:
-                if not user.is_active:
-                    raise serializers.ValidationError('Account is disabled.')
+                print(passw,"and ",user.password)
+                if user.password == make_password(password):
+                    if not user.is_active:
+                        raise serializers.ValidationError('Account is disabled.')
+                    raise serializers.ValidationError('Invalid Password.')
                 return user
             else:
                 raise serializers.ValidationError('Unable to log in with provided credentials.')

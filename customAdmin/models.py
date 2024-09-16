@@ -29,8 +29,7 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 
-class CustomUser(AbstractUser,PermissionsMixin):
-    
+class CustomUser(AbstractUser,PermissionsMixin):  
     def user_avatar_upload_to(instance, filename):
     # Ensure the user ID is available
         ext = os.path.splitext(filename)[1]  # Get file extension (e.g., .jpg or .png)
