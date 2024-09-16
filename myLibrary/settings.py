@@ -140,14 +140,16 @@ os.getenv('DATABASE_URL')
 if os.getenv('DEVLOPMENT')=="TRUE":
     dbuser = 'root'
     PASSWORD ='Ra&5_153'
+    dbname = "library_man"
 else :
+    dbname = "library_manager"
     dbuser = 'samar'
     PASSWORD ='Samar@65535101'
 
 DATABASES = {  
         'default': {  
             'ENGINE': 'django.db.backends.mysql',  
-            'NAME': 'library_manger',  
+            'NAME': dbname,  
             'USER': dbuser,  
             'PASSWORD': PASSWORD,  
             'HOST': 'localhost',  
