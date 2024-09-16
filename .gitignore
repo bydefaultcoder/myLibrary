@@ -12,6 +12,7 @@ build/
 develop-eggs/
 dist/
 downloads/
+
 eggs/
 .eggs/
 lib/
@@ -50,7 +51,11 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
-
+/*/migrations/*
+*/migrations/*
+**/migrations/**
+!**/migrations
+!**/migrations/__init__.py
 # Translations
 *.mo
 *.pot
