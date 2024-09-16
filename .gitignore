@@ -51,14 +51,21 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+
+# Translations
+*.mo
+*.pot
+
+# photos
+*.png
+*.jpg
+
+# migrations
 /*/migrations/*
 */migrations/*
 **/migrations/**
 !**/migrations
 !**/migrations/__init__.py
-# Translations
-*.mo
-*.pot
 
 # Django stuff:
 *.log
