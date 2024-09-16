@@ -7,16 +7,30 @@ class StudentRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Student
-        fields = ['first_name', 'last_name', 'email', 'date_of_birth', 'password']
+        # fields = ['first_name', 'last_name', 'email', 'date_of_birth', 'password']
+        fields = [  
+            "email",
+            "first_name",
+            "last_name",
+            "phone_no",
+            "date_of_birth",
+            "password",
+            "address",
+            "adhar_no",]
 
     def create(self, validated_data):
+
+        print(validated_data)
         user = Student.objects.create_user(
-            username=validated_data['email'],  # Assuming username is email
+            # username=validated_data['phone_no'],  #  username is phone
             email=validated_data['email'],
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name'],
+            phone_no=validated_data['phone_no'],
             date_of_birth=validated_data['date_of_birth'],
             password=validated_data['password'],
+            address=validated_data['address'],
+            adhar_no=validated_data['adhar_no'],
         )
         return user
 

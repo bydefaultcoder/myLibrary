@@ -260,6 +260,11 @@ class SeatAdmin(admin.ModelAdmin):
         if db_field.name == 'student':
             formfield.queryset = Student.objects.filter(created_by=request.user)
         return formfield
+    change_list_template = "admin/studentlist.html"
+    # def changelist_view(self,request, **kwarg):
+    #     templateResponse  = super().changelist_view(request, **kwarg)
+    #     # templateResponse.template = 
+    #     return templateResponse
 
 class MonthlyPlanAdmin(admin.ModelAdmin):
     list_display = ('getPlanningFor','getHours', 'getPrize',  'status')

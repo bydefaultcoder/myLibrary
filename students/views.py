@@ -15,6 +15,7 @@ class RegisterAPIView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        print("yaha tak error nahi hui")
         user = serializer.save()
         token, created = Token.objects.get_or_create(user=user)
         return Response({

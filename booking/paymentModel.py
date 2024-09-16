@@ -27,7 +27,7 @@ class Payment(models.Model):
     payment_id = models.AutoField(primary_key=True, verbose_name="Location No")
     payment_type = models.CharField(choices=TYPE_CHAOICES,null=False,blank=False,verbose_name="Type Of Payment",max_length=10)
  
-    creditorstudent = models.ForeignKey(Student,null=True,on_delete=models.PROTECT,blank=True, related_name='student_payments')
+    # creditorstudent = models.ForeignKey(Student,null=True,on_delete=models.PROTECT,blank=True, related_name='student_payments')
     creditoruser = models.ForeignKey(CustomUser,on_delete=models.PROTECT,null=True,blank=True, related_name='creditor_payments')
     debitoruser = models.ForeignKey(CustomUser,on_delete=models.PROTECT,null=True,blank=True, related_name='debitor_payments')
     # for razorpay

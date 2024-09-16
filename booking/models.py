@@ -21,7 +21,11 @@ class Location(models.Model):
         ('exposed', 'Exposed'),
         # ('suspended', 'Suspended'),
     ]
-    timming = [ (4,"4:00 AM Morning"), (5,"5:00 AM Morning"), (6,"6:00 AM Morning"), 
+    TIMMING_CHOICES = [
+        ('full', 'Full Day'),
+        ('custom', 'Custom timming'),
+    ]
+    cho_timmings = [ (4,"4:00 AM Morning"), (5,"5:00 AM Morning"), (6,"6:00 AM Morning"), 
                        (7,"7:00 AM"), (8,"8:00 AM"), (9,"9:00 AM"), (10,"10:00 AM"), 
                        (11,"11:00 AM"), (12,"12:00 PM (noon)"), (13,"1:00 PM"), (14,"2:00 PM"), 
                        (15,"3:00 PM"), (16,"4:00 PM"), (17,"5:00 PM"), (18,"6:00 PM"), 
@@ -30,8 +34,9 @@ class Location(models.Model):
                        (3,"3:00 AM Night"),]
     location_id = models.AutoField(primary_key=True, verbose_name="Library Id")
     location_name = models.CharField(max_length=100,verbose_name="Library Name")
-    opening_time = models.PositiveIntegerField(choices=timming,verbose_name="Opening Time(leave it blank for full time)",null=True,blank=True)
-    closing_time = models.PositiveIntegerField(choices=timming,verbose_name="Closing Time(leave it blank for full time)",null=True,blank=True)
+    timming = models.CharField(choices=TIMMING_CHOICES,default="full",max_length=10)
+    opening_time = models.PositiveIntegerField(choices=cho_timmings,verbose_name="Opening Time(leave it blank for full time)",null=True,blank=True)
+    closing_time = models.PositiveIntegerField(choices=cho_timmings,verbose_name="Closing Time(leave it blank for full time)",null=True,blank=True)
     discription = models.TextField(null=True,blank=True)
     number_of_seats = models.PositiveIntegerField(verbose_name='No of Seats')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
@@ -173,13 +178,9 @@ class Booking(models.Model):
         ('active', 'Active'),
         ('inactive', 'Inactive'),
     ]
-    TIMMING_CHOICES = [
-        ('full', 'Full Day'),
-        ('custom', 'Custom timming'),
-    ]
+
     student = models.ForeignKey(Student,on_delete=models.PROTECT , related_name='bookings') # getting
     seat = models.ForeignKey(Seat, on_delete=models.CASCADE,related_name='bookings') # getiing
-    timming = models.CharField(choices=TIMMING_CHOICES,default="full",max_length=10)
     booking_time = models.DateTimeField(auto_now_add=True) # no issue
     extended_date = models.DateTimeField(null=True,blank=True) # solved
     joining_date = models.DateTimeField(null=True,blank=True) # getting
