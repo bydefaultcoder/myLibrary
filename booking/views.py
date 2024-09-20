@@ -8,7 +8,7 @@ from django.contrib import messages
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, HttpRequest, HttpResponseBadRequest,HttpResponseRedirect
-
+from django.db.models import Min, Max ,Count, Q
 # @login_required
 def index(request):
     seats = Seat.objects.all()
@@ -83,7 +83,7 @@ def get_seats(request:HttpRequest)->HttpResponse:
             # {i.hours}_{i.prize}_{i.planing_for}_{i.duration}
             timming_data = seat.filter_available(joining_date,hour,duration*multiple*type[planing_for])
             # seat_dict = {f"seatNo:{seat.seat_no}":(seat.pk,timming_data["timming"]) for seat in seats}
-            seat_dict = {seat.pk:[f"seatNo:{seat.seat_no}",timming_data["timming"]] for seat in seats}
+            seat_dict = {seat.pk:[f"seatNo:{seat.seat_no} {start_and_end_timing(seat)}",timming_data["timming"]] for seat in seats}
         # print(seats,"here")
         return JsonResponse(seat_dict)
         # except Exception as e :
@@ -91,6 +91,19 @@ def get_seats(request:HttpRequest)->HttpResponse:
 
             # return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+def start_and_end_timing(modelObject):
+    # Filter bookings for the specific seat
+    if modelObject.status == 'removed':
+        return "Removed"
+    seatObj = Booking.objects.filter(seat=modelObject)
+    # Aggregate to get the earliest start_time and the latest end_time
+    start_time = seatObj.aggregate(start_time=Min('start_time'))['start_time']
+    end_time = seatObj.aggregate(end_time=Max('end_time'))['end_time']
+
+    if start_time and end_time:
+        return f'{start_time.strftime("%I%p")} to {end_time.strftime("%I%p")}'
+    else:
+        return 'Not alloted (Active)'
 
 @login_required
 def get_seat_available_timing(request:HttpRequest):

@@ -86,5 +86,5 @@ class Student(CustomUser):
            self.stu_no = Student.objects.filter(created_by=self.created_by).count()+ 1
         if self.avatar:
             self.avatar.name = self.avatar.name.replace('None',f'{self.stu_no}') 
-
+        print(self.status)
         super().save(*args, **kwargs)

@@ -7,7 +7,7 @@ from django.db import transaction
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone as tz
-from django.core.validators import MinValueValidator,MaxLengthValidator,MinLengthValidator
+from django.core.validators import MinValueValidator
 from  datetime import time,timedelta
 from dateutil.relativedelta import relativedelta
 from customAdmin.models import CustomUser
@@ -193,10 +193,6 @@ class Booking(models.Model):
         verbose_name_plural = "Seat Bookings"  # Plural form
     @transaction.atomic
     def save(self, *args, **kwargs) -> None:
-        seat = self.seat
-        student = self.student
-        student.status = 'alloted'
-        seat.status = 'engaged'
         print("heiiiiiiiiiiiii")
         splited_plan = self.plan.split("_")
         if splited_plan[2]=="d":
@@ -209,21 +205,22 @@ class Booking(models.Model):
             delta = relativedelta(days=0)
 
         self.extended_date = self.joining_date +delta
-# {'student': <Student: Samarjeet Singh Gautam (enrolled)>, 'location': <Location: studento-2>, 
-# 'joining_date': datetime.date(2024, 9, 17), 'plan': '6_600_m_1', 'duration': 1, 'seat_finder': '', 
-# 'seat': <Seat: Seat no.4>, 'start_time': '09:00:00', 'end_time': '15:00:00', 'discount': 0.0, 'total_amount': 600.0}
         amount = int(self.plan.split("_")[1]) * self.duration
         # print(self.pk,"pk here 156" ,self.pk is None,self.pk==None)
         if self.pk is None:
             try:
                 with transaction.atomic():
-                    # print("hello")
+                    print("hello---------------")
+                    seat = self.seat
+                    student = self.student
+                    student.status = 'alloted'
+                    seat.status = 'engaged'
                     seat.save()
                     student.save()
                     
                     payment = Payment.objects.create(
                         payment_type = "seat_book",
-                        creditorstudent = self.student, # credituser or creditorstudent
+                        creditoruser = self.student, # credituser or creditorstudent
                         debitoruser= self.created_by,
                     #  razorpay_payment_id razorpay_order_id razorpay_signature 
                         amount = amount,
@@ -235,10 +232,11 @@ class Booking(models.Model):
                     BookingPayment.objects.create(
                         booking=self,
                         payment=payment
-                    )
+                    )         
             except Exception as e:
                 print("Error.." ,e)
-        # super().save(*args, **kwargs)
+
+            # super().save(*args, **kwargs)
     def __str__(self):
         return f'name: {self.student.first_name} {self.student.last_name}  Library:{self.seat.location.location_id} - seat no: {self.seat.seat_id} - ({self.status})'
 class BookingPayment(models.Model):

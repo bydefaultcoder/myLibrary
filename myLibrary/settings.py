@@ -91,6 +91,9 @@ MIDDLEWARE = [
 ]
 
 REST_FRAMEWORK = {
+    # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    # 'PAGE_SIZE': 10,  # Default number of items per page
+
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
@@ -195,7 +198,7 @@ USE_TZ = False
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-
+SESSION_SAVE_EVERY_REQUEST = True
 STATIC_URL = '/static/'   
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles") 
 

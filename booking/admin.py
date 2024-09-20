@@ -234,7 +234,7 @@ class SeatAdmin(admin.ModelAdmin):
         end_time = seatObj.aggregate(end_time=Max('end_time'))['end_time']
 
         if start_time and end_time:
-            return f'{start_time} - {end_time}'
+            return f'{start_time.strftime("%I%p")} to {end_time.strftime("%I%p")}'
         else:
             return 'Not alloted (Active)'
         # return '333'
