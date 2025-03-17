@@ -3,6 +3,8 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+
+from booking.forms.Library_form import LibraryForm
 from .models import MonthlyPlan, Seat, Booking,Location
 from django.contrib import messages
 import json
@@ -128,4 +130,35 @@ def get_mothlyplans_by_user(request):
     print(plans)
     
     return JsonResponse({"data":list(plans.values())})
+
+# lib-----------------------------start
+@login_required    
+def get_lib(request):
+    libraries = Location.objects.all()
+    print(libraries)
+    return render(request,'customadmin/library.html',{"data":libraries})
+
+@login_required    
+def create_lib(request):
+    if request.method == "POST":
+        form = LibraryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('lib')  # Redirect to a success page
+    else:
+        form = LibraryForm()
     
+    return render(request, "customadmin/library_form.html", {"form": form})
+# lib-----------------------------end
+
+@login_required
+def get_seat(request):
+    seat = Seat.objects.all().order_by('seat_no')
+    # print(libraries)
+    return render(request,'customadmin/seats.html',{"data":seat})
+@login_required
+def get_plan(request):
+    plan = MonthlyPlan.objects.all()
+    # print(libraries)
+    return render(request,'customadmin/plans.html',{"data":plan})
+

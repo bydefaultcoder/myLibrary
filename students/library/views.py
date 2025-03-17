@@ -7,7 +7,7 @@ from students.library.pagination import MyPagination
 
 from .dbQueries import get_libraries
 
-from .LibratySerializers import LocationSerializer
+from .libratyserializers import LocationSerializer
 from django.http import JsonResponse
 
 

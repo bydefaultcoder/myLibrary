@@ -11,6 +11,7 @@ from django.utils import timezone as tz
 from django.core.validators import MinValueValidator,MaxLengthValidator,MinLengthValidator
 from django.contrib.auth.models import AbstractUser, AbstractBaseUser
 from customAdmin.models import CustomUser
+from django.utils.html import format_html
 from django.contrib.auth.hashers import make_password
 # from django.contrib.auth.models import AbstractUser
 
@@ -71,7 +72,9 @@ class Student(CustomUser):
         return f"{self.first_name} {self.last_name} ({self.status})"
     def getfullname(self):
         return f"{self.first_name} {self.last_name}"
-    
+    def image_tag(self,):
+        if self.avatar:
+            return self.avatar.url
     def save(self, *args, **kwargs):
         # Check if the status has changed
         print(self.is_staff,self.is_superuser,"hellossssssssssssssssssssssss")

@@ -32,3 +32,11 @@ class LoginAPIView(APIView):
         user = serializer.validated_data
         token, created = Token.objects.get_or_create(user=user)
         return Response({"token": token.key}, status=status.HTTP_200_OK)
+
+def get_student(request):
+    student =  Student.objects.all()
+    return render(request,'customadmin/students.html',{"data":student})
+
+# def create_lib(request):
+#     student =  Student.objects.all()
+#     return render(request,'customadmin/students.html',{"data":student})

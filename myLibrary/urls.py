@@ -20,7 +20,7 @@ from booking.views import get_seats,get_seat_available_timing,get_mothlyplans_by
 from customAdmin.views import display_profile, recent_actions
 # from customAdmin.views import CustomUserDetailView
 from customAdmin.admin import admin_site
-
+from .home_urls import homeUrls
 
 from django.conf.urls.static import static
 from django.conf import settings 
@@ -28,6 +28,7 @@ from .views import homepage
 urlpatterns = [
     # path('grappelli/', include('grappelli.urls'))
     re_path(r'^i18n/', include('django.conf.urls.i18n')),
+    path('home/', include(homeUrls) ,name='home'),
     
     path('admin/api-booking/get_timming_by_seat/', get_seat_available_timing, name='get_timming_by_seat'),
     # path('admin/api-booking/get_mothlyplans_by_user/', get_mothlyplans_by_user, name='get_mothlyplans_by_user'),

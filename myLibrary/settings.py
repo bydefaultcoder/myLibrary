@@ -125,7 +125,7 @@ WSGI_APPLICATION = 'myLibrary.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-os.getenv('DATABASE_URL')
+# os.getenv('DATABASE_URL')
 # DATABASES = {  
 #     'default': {  
 #         'ENGINE': 'django.db.backends.mysql',  
@@ -140,28 +140,34 @@ os.getenv('DATABASE_URL')
 #     }  
 # }  
 # print(os.getenv('DEVLOPMENT'))
-if os.getenv('DEVLOPMENT')=="TRUE":
-    dbuser = 'root'
-    PASSWORD ='Ra&5_153'
-    dbname = "library_man"
-else :
-    dbname = "library_manager"
-    dbuser = 'samar'
-    PASSWORD ='Samar@65535101'
+# if os.getenv('DEVLOPMENT')=="TRUE":
+#     dbuser = 'root'
+#     PASSWORD ='Ra&5_153'
+#     dbname = "library_man"
+# else :
+#     dbname = "library_manager"
+#     dbuser = 'samar'
+#     PASSWORD ='Samar@65535101'
 
-DATABASES = {  
-        'default': {  
-            'ENGINE': 'django.db.backends.mysql',  
-            'NAME': dbname,  
-            'USER': dbuser,  
-            'PASSWORD': PASSWORD,  
-            'HOST': 'localhost',  
-            'PORT': 3306,
-            'OPTIONS': {  
-                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"  
-            }  
-        }  
-    }  
+# DATABASES = {  
+#         'default': {  
+#             'ENGINE': 'django.db.backends.mysql',  
+#             'NAME': dbname,  
+#             'USER': dbuser,  
+#             'PASSWORD': PASSWORD,  
+#             'HOST': 'localhost',  
+#             'PORT': 3306,
+#             'OPTIONS': {  
+#                 'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"  
+#             }  
+#         }  
+#     }  
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 
 
 # Password validation

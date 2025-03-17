@@ -1,0 +1,42 @@
+{% extends "customadmin/index.html" %}
+{% load static %}
+
+{% block navcontent %}
+{% include 'customadmin/sidebar.html' with active='plan' %} 
+{% endblock navcontent %}
+{% block content %}
+
+<div class="dash-content" style="padding-top: 0px;     border-bottom: 4px solid var(--primary-color);">
+    <div class="activity">
+        <div class="title" style="margin: 0px 0 10px 0;">
+            <i class="uil uil-university"></i>
+            <span class="text">Seats</span>
+        </div>
+    </div>
+</div>
+{% comment %} <div class="dash-content other-content activity-container "> {% endcomment %}
+    <div class="activity-container" style="grid-template-columns: 1fr 1fr 1fr 2fr 1fr;">
+        <!-- Header Row ('getPlanningFor','getHours', 'getPrize',  'status') -->
+        <div class="activity-header">
+            <span class="data-list">Plan type</span>
+            <span class="data-list">Hours</span>
+            <span class="data-list">Price</span>
+            <span class="data-list">Status</span>
+            <span class="data-list">Actions</span>
+        </div>
+    
+        <!-- Data Rows -->
+        {% for i in data %}
+        <div class="activity-data">
+            <span class="data-list">{{ i.getPlanningFor }}</span>
+            <span class="data-list">{{ i.getHours }}</span>
+            <span class="data-list">{{ i.getPrize }}</span>
+            <span class="data-list">{{ i.status }}</span>
+            <span class="data-list">
+                <a class="edit" href="#"><i class="uil uil-edit"></i> Edit</a>
+                <a class="edit" href="#"><i class="uil uil-trash"></i> Delete</a>
+            </span>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock content %}

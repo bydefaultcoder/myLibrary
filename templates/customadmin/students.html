@@ -1,0 +1,42 @@
+{% extends "customadmin/index.html" %}
+{% load static %}
+
+{% block navcontent %}
+{% include 'customadmin/sidebar.html' with active='student' %} 
+{% endblock navcontent %}
+{% block content %}
+
+<div class="dash-content" style="padding-top: 0px;     border-bottom: 4px solid var(--primary-color);">
+    <div class="activity">
+        <div class="title" style="margin: 0px 0 10px 0;">
+            <i class="uil uil-university"></i>
+            <span class="text">Seats</span>
+        </div>
+    </div>
+</div>
+{% comment %} <div class="dash-content other-content activity-container "> {% endcomment %}
+    <div class="activity-container" style="grid-template-columns: 1fr 1fr 1fr 2fr 1fr;">
+        <!-- Header Row -->
+        <div class="activity-header">
+            <span class="data-list">Photo</span>
+            <span class="data-list">Full Name</span>
+            <span class="data-list">Contact no</span>
+            <span class="data-list">Address</span>
+            <span class="data-list">Actions</span>
+        </div>
+    
+        <!-- Data Rows -->
+        {% for i in data %}
+        <div class="activity-data">
+            <span class="data-list"><img class="student-img" src="{{ i.image_tag }}" alt=""></span>
+            <span class="data-list">{{ i.getfullname }}</span>
+            <span class="data-list">{{ i.phone_no }}</span>
+            <span class="data-list">{{ i.address }}</span>
+            <span class="data-list">
+                <a class="edit" href="#"><i class="uil uil-edit"></i> Edit</a>
+                <a class="edit" href="#"><i class="uil uil-trash"></i> Delete</a>
+            </span>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock content %}

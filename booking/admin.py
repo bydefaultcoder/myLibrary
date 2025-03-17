@@ -224,19 +224,6 @@ class SeatAdmin(admin.ModelAdmin):
     class Meta:
         ordering = ['-seat_no']  # Sorts by title in ascending order
 
-    def start_and_end_timing(self, modelObject):
-        # Filter bookings for the specific seat
-        if modelObject.status == 'removed':
-            return "Removed"
-        seatObj = Booking.objects.filter(seat=modelObject)
-        # Aggregate to get the earliest start_time and the latest end_time
-        start_time = seatObj.aggregate(start_time=Min('start_time'))['start_time']
-        end_time = seatObj.aggregate(end_time=Max('end_time'))['end_time']
-
-        if start_time and end_time:
-            return f'{start_time.strftime("%I%p")} to {end_time.strftime("%I%p")}'
-        else:
-            return 'Not alloted (Active)'
         # return '333'
 
     def get_queryset(self, request):

@@ -1,0 +1,51 @@
+<div class="menu-items">
+    <ul class="nav-links">
+        {% comment %} {% if {{active}} == 'dashboard' %}active{% endif %} {% endcomment %}
+        <li ><a href="{% url 'dash'%}">
+            <i class="uil uil-estate {% if active == 'dashboard' %} active {% else %} {% endif %}"></i>
+            <span class="link-name">Dahsboard</span>
+        </a></li>
+        <li><a href="{% url 'lib' %}">
+            <i class="uil uil-university {% if active == 'library' %} active {% else %} {% endif %}"></i>
+            <span class="link-name">Libraries</span>
+        </a></li>
+        <li><a href="{% url 'seat' %}">
+            <i class="uil uil-meeting-board {% if active == 'seat' %} active {% else %} {% endif %}"></i>
+            <span class="link-name">Seats</span>
+        </a></li>
+        <li><a href="{% url 'student' %}">
+            <i class="uil uil-book-reader {% if active == 'student' %} active {% else %} {% endif %}"></i>
+            <span class="link-name">Students</span>
+        </a></li>
+        <li><a href="{% url 'plan' %}">
+            <i class="uil uil-moneybag {% if active == 'plan' %} active {% else %} {% endif %}"></i>
+            <span class="link-name">Plans</span>
+        </a></li>
+        <li><a href="{% url 'booking' %}">
+            <i class="uil uil-pen {% if active == 'booking' %} active {% else %} {% endif %}"></i>
+            <span class="link-name">Seat Alottement</span>
+        </a></li>
+        <li><a href="{% url 'trans' %}">
+            <i class="uil uil-money-stack {% if active == 'trans' %} active {% else %} {% endif %}"></i>
+            <span class="link-name">Transactions</span>
+        </a></li>
+    </ul>
+
+    <ul class="logout-mode">
+        <li><a href="#">
+            <i class="uil uil-signout"></i>
+            <span class="link-name">Logout</span>
+        </a></li>
+
+        <li class="mode">
+            <a href="#">
+                <i class="uil uil-moon"></i>
+            <span class="link-name">Dark Mode</span>
+        </a>
+
+        <div class="mode-toggle">
+          <span class="switch"></span>
+        </div>
+    </li>
+    </ul>
+</div>
