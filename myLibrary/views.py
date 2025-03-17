@@ -12,8 +12,6 @@ def get_student(request):
 def get_plan(request):
     return render(request,'customadmin/plans.html')
 
-def get_booking(request):
-    return render(request,'customadmin/booking.html')
 
 def get_trans(request):
     return render(request,'customadmin/transaction.html')

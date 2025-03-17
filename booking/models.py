@@ -12,8 +12,6 @@ from  datetime import time,timedelta
 from dateutil.relativedelta import relativedelta
 from customAdmin.models import CustomUser
 from students.models import Student
-from utils.relatedToDate import format_time
-from django.db.models import Min, Max ,Count, Q
 # import calendar
 from .paymentModel import Payment
 class Location(models.Model):
@@ -46,13 +44,6 @@ class Location(models.Model):
     class Meta:
         verbose_name = "library"          # Singular form
         verbose_name_plural = "libraries"  # Plural form
-
-    def open_closing_time(self):
-        time = self.getTotalOpenTime()
-        if time:
-            return f'from {format_time(self.opening_time)} to {format_time(self.closing_time)} ({time} hours)'
-        else:
-            return "Full day"
     
     def getTotalOpenTime(self):
         closing = self.closing_time
@@ -169,19 +160,6 @@ class Seat(models.Model):
         available_hours = [hour for hour in all_hours if hour.hour not in unavailable_hours]
         available_choices = [hour.hour for hour in available_hours]
         return {"timming":available_choices}
-    def start_and_end_timing(self):
-        # Filter bookings for the specific seat
-        if self.status == 'removed':
-            return "Removed"
-        seatObj = Booking.objects.filter(seat=self)
-        # Aggregate to get the earliest start_time and the latest end_time
-        start_time = seatObj.aggregate(start_time=Min('start_time'))['start_time']
-        end_time = seatObj.aggregate(end_time=Max('end_time'))['end_time']
-
-        if start_time and end_time:
-            return f'{start_time.strftime("%I%p")} to {end_time.strftime("%I%p")}'
-        else:
-            return 'Not alloted (Active)'
 
 @receiver(post_delete, sender=Seat)
 def update_location_on_seat_delete(sender, instance, **kwargs):
@@ -261,6 +239,41 @@ class Booking(models.Model):
             # super().save(*args, **kwargs)
     def __str__(self):
         return f'name: {self.student.first_name} {self.student.last_name}  Library:{self.seat.location.location_id} - seat no: {self.seat.seat_id} - ({self.status})'
+    
+    def Studnt_Name(self):
+        return self.student.getfullname()
+
+    def Seat_no(self):
+        return self.seat.seat_no
+    def Seat_no_w_lib(self):
+        return f"Library:{self.seat.location.location_name}  seatNo: {self.seat.seat_no}"
+    def active_hour(self):
+        hours = self.end_time.hour - self.start_time.hour
+        return  f"{self.start_time.strftime("%I%p")} to {self.end_time.strftime("%I%p")} for({hours})"
+    def joining_date_wr(self):
+        today = tz.now()
+        rem_day = self.joining_date - today
+        if rem_day.days >0:
+            return f"{self.joining_date.date().strftime('%d %b %Y')} ({rem_day.days} days to join)"
+        if rem_day.days ==0:
+           return f"{self.joining_date.date().strftime('%d %b %Y')} (Joining today)"
+        return f"{self.joining_date.date().strftime('%d %b %Y')}"
+
+    def timming(self):
+        return f"{self.convertToReadableTimeing(f"{self.start_time}")} to {self.convertToReadableTimeing(f"{self.end_time}")}"
+
+    def valid_till(self):
+        today = tz.now()
+        rem_day = self.extended_date - today
+        startedIn = self.joining_date - today
+        if startedIn.days>=0:
+            fordays = self.joining_date - self.extended_date
+            return f'{self.extended_date.date().strftime('%d %b %Y')} (for {fordays.days})'
+
+        if rem_day.days >0:
+            return f'{self.extended_date.date().strftime('%d %b %Y')}(will expire in rem_day.days)'
+        if rem_day.days >0:
+            return f'{self.extended_date.date().strftime('%d %b %Y')}(will expire in rem_day.days)'
 class BookingPayment(models.Model):
     booking = models.ForeignKey(Booking,on_delete=models.CASCADE,related_name="booking_payments")  # Reference to Booking
     payment = models.ForeignKey(Payment,on_delete=models.CASCADE,related_name="bookings")  # Reference to Payment
@@ -313,9 +326,6 @@ class MonthlyPlan(models.Model):
 
     def __str__(self):
         return f'cost {self.prize} 1 month in rupee{self.prize}'
-    class Meta:
-        verbose_name = "Monthly Plan"          # Singular form
-        verbose_name_plural = "Monthly Plans"  # Plural form
 
     def getPlanningFor(self):
         if self.planing_for=="d" :
@@ -326,9 +336,11 @@ class MonthlyPlan(models.Model):
           output = f'For {self.duration} Weeks'
         return output
     
-    def getPrize(self):
-        return f'{self.prize} ₹'
-    
     def getHours(self):
         return f'{self.hours} Hours'
+    def getPrize(self):
+        return f'{self.prize} ₹'
+    class Meta:
+        verbose_name = "Monthly Plan"          # Singular form
+        verbose_name_plural = "Monthly Plans"  # Plural form
 

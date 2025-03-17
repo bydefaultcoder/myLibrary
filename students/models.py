@@ -82,11 +82,14 @@ class Student(CustomUser):
         if not self.pk:
            if self.password and self.created_by.pk==1:
                pass
+            #    user = super().save(commit=False)
                 # self.password = make_password(self.password)  # Set your default password here
            else:
+                # user = super().save(commit=False)
                 self.password = make_password(f"{self.phone_no}@{self.last_name}")  # Set your default password here
         else:        
            self.stu_no = Student.objects.filter(created_by=self.created_by).count()+ 1
+        print(self.avatar)
         if self.avatar:
             self.avatar.name = self.avatar.name.replace('None',f'{self.stu_no}') 
         print(self.status)

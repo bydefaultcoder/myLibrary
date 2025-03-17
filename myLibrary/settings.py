@@ -235,3 +235,5 @@ JAZZMIN_SETTINGS = ui_settings
 
 
 JAZZMIN_UI_TWEAKS = ui_tweaks_setting
+
+LOGIN_URL = '/admin/login/'
