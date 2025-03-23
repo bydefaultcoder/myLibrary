@@ -3,15 +3,19 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
 from booking.models import Location
+from myLibrary.decorators import role_required
 from students.library.pagination import MyPagination
 
 from .dbQueries import get_libraries
 
 from .libratyserializers import LocationSerializer
 from django.http import JsonResponse
-
+from rest_framework.decorators import api_view, authentication_classes
+from rest_framework.authentication import TokenAuthentication
 
 @api_view(['get'])
+@authentication_classes([TokenAuthentication])
+@role_required("Student")
 def all_libraries(request):
     # Fetch data using raw SQL
     paginator = MyPagination()  # Use your custom pagination class    # Calculate limit and offset for the SQL query

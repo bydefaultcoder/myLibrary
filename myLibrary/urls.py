@@ -16,11 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include,re_path, include
-from booking.views import get_seats,get_seat_available_timing,get_mothlyplans_by_user
+from booking.vender_views import get_seats,get_seat_available_timing,get_mothlyplans_by_user
 from customAdmin.views import display_profile, recent_actions
 # from customAdmin.views import CustomUserDetailView
 from customAdmin.admin import admin_site
 from .home_urls import homeUrls
+from students.urls import urlpatterns as std_url
 
 from django.conf.urls.static import static
 from django.conf import settings 
@@ -28,7 +29,6 @@ from .views import homepage
 urlpatterns = [
     # path('grappelli/', include('grappelli.urls'))
     re_path(r'^i18n/', include('django.conf.urls.i18n')),
-    path('home/', include(homeUrls) ,name='home'),
     
     path('admin/api-booking/get_timming_by_seat/', get_seat_available_timing, name='get_timming_by_seat'),
     # path('admin/api-booking/get_mothlyplans_by_user/', get_mothlyplans_by_user, name='get_mothlyplans_by_user'),
@@ -36,7 +36,8 @@ urlpatterns = [
     path('admin/user-profile/', display_profile,name="user_profile"),
     path('admin/recent_actions/', recent_actions, name='recent_actions'),
     path('admin/', admin_site.urls),
-    path('api/students/', include('students.urls')),
+    path('api-students/', include(std_url)),
     path('api/get_seats/', get_seats, name='get_seats_by_location_w_date'), 
+    path('home/', include(homeUrls) ,name='home'),
     path('', homepage),
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_DIR)+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

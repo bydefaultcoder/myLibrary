@@ -25,11 +25,11 @@ from django.urls import path, include,re_path, include
 # from django.conf.urls.static import static
 # from django.conf import settings 
 from .views import dashboard,get_trans
-from booking.views import get_lib,get_seat,get_plan,create_lib,add_seat,create_plan,seat_allotment,get_booking
+from booking.vender_views import get_lib,get_seat,get_plan,create_lib,add_seat,create_plan,seat_allotment,get_booking
 from students.views import get_student,add_student
 
 homeUrls = [
-    path('dashboard', view= dashboard ,name='dash' ),
+    path('', view= dashboard ,name='dash' ),
     # ---------------
     path('lib', view= get_lib ,name='lib'),
     path('create-lib', view= create_lib ,name='create_lib'),

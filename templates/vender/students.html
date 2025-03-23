@@ -1,8 +1,8 @@
-{% extends "customadmin/index.html" %}
+{% extends "vender/index.html" %}
 {% load static %}
 
 {% block navcontent %}
-{% include 'customadmin/sidebar.html' with active='seat' %} 
+{% include 'vender/sidebar.html' with active='student' %} 
 {% endblock navcontent %}
 {% block content %}
 
@@ -10,12 +10,12 @@
     <div class="activity" >
         <div class="title"style="margin: 0px 0px 10px 0px;">
             <div class="dash-items">
-                <i class="uil uil-university"></i>
-                <span class="text">Seats</span>
+                <i class="uil uil-book-reader"></i>
+                <span class="text">Student</span>
             </div>
 
             <div class="select-menu">
-                <a title="create new Library" href="{% url 'create_seat' %}"> <i class="uil uil-edit"></i> </a> <!-- Stylish Create Button -->
+                <a title="Add student" href="{% url 'add_student' %}"> <i class="uil uil-edit"></i> </a> <!-- Stylish Create Button -->
                 <div class="select-items select-items1">
                     <select name="" id="">
                         <option value="">select</option>
@@ -34,21 +34,23 @@
     </div>
 </div>
 {% comment %} <div class="dash-content other-content activity-container "> {% endcomment %}
-    <div class="activity-container" style="grid-template-columns: 1fr 1fr 2fr 2fr;">
+    <div class="activity-container" style="grid-template-columns: 1fr 1fr 1fr 2fr 1fr;">
         <!-- Header Row -->
         <div class="activity-header">
-            <span class="data-list">Seat No.</span>
-            <span class="data-list">Library No</span>
-            <span class="data-list">Engaged Between</span>
+            <span class="data-list">Photo</span>
+            <span class="data-list">Full Name</span>
+            <span class="data-list">Contact no</span>
+            <span class="data-list">Address</span>
             <span class="data-list">Actions</span>
         </div>
     
         <!-- Data Rows -->
         {% for i in data %}
         <div class="activity-data">
-            <span class="data-list">{{ i.seat_no }}</span>
-            <span class="data-list">{{ i.location }}</span>
-            <span class="data-list">{{ i.start_and_end_timing }}</span>
+            <span class="data-list"><img class="student-img" src="{{ i.image_tag }}" alt=""></span>
+            <span class="data-list">{{ i.getfullname }}</span>
+            <span class="data-list">{{ i.phone_no }}</span>
+            <span class="data-list">{{ i.address }}</span>
             <span class="data-list">
                 <a class="edit" href="#"><i class="uil uil-edit"></i> Edit</a>
                 <a class="edit" href="#"><i class="uil uil-trash"></i> Delete</a>

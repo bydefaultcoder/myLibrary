@@ -3,7 +3,7 @@
 import os
 import sys
 import socket
-import pyqrcode  # Import pyqrcode for QR code generation
+# import pyqrcode  # Import pyqrcode for QR code generation
 
 # Get system's IP address
 hostname = socket.gethostname()
@@ -15,14 +15,10 @@ def main():
     try:
         from django.core.management import execute_from_command_line
         
-        # If no arguments are provided, default to running the server
-        if len(sys.argv) == 1:
-            sys.argv.append("runserver")
-
         if sys.argv[1] == 'runserver':
             print(f"Starting server at http://{IPAddr}:4000/")
-            qr = pyqrcode.create(f"http://{IPAddr}:4000")
-            print(qr.terminal(quiet_zone=1))  # Display QR code in terminal
+            # qr = pyqrcode.create(f"http://{IPAddr}:4000")
+            # print(qr.terminal(quiet_zone=1))  # Display QR code in terminal
             execute_from_command_line([sys.argv[0], "runserver", f"{IPAddr}:4000"])
             
             # Allow external access

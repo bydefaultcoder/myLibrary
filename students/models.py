@@ -1,7 +1,7 @@
 import os
 from typing import Any
 from django.db import models
-from django.contrib.auth.models import BaseUserManager
+from django.contrib.auth.models import BaseUserManager,Group
 from django.db import models
 from django.contrib.auth.models import User
 from django.db import transaction
@@ -14,7 +14,6 @@ from customAdmin.models import CustomUser
 from django.utils.html import format_html
 from django.contrib.auth.hashers import make_password
 # from django.contrib.auth.models import AbstractUser
-
 
 class StudentManager(BaseUserManager):
     def create_user(self, phone_no, password=None, **extra_fields):
@@ -43,8 +42,7 @@ class Student(CustomUser):
         print(new_filename)
         return os.path.join('student/avatars', new_filename)
     username = None
-    groups = None
-    user_permissions = None
+
     is_staff = None  # Remove this if students don't need staff access
     is_superuser = None  # Remove this if students don't need superuser access
     # customuser_ptr = None
@@ -77,13 +75,11 @@ class Student(CustomUser):
             return self.avatar.url
     def save(self, *args, **kwargs):
         # Check if the status has changed
-        print(self.is_staff,self.is_superuser,"hellossssssssssssssssssssssss")
+        # print(self.is_staff,self.is_superuser,self.created_by.pk,"hellossssssssssssssssssssssss")
         self.username = self.email
         if not self.pk:
            if self.password and self.created_by.pk==1:
                pass
-            #    user = super().save(commit=False)
-                # self.password = make_password(self.password)  # Set your default password here
            else:
                 # user = super().save(commit=False)
                 self.password = make_password(f"{self.phone_no}@{self.last_name}")  # Set your default password here
@@ -92,5 +88,37 @@ class Student(CustomUser):
         print(self.avatar)
         if self.avatar:
             self.avatar.name = self.avatar.name.replace('None',f'{self.stu_no}') 
-        print(self.status)
+        # print(self.status)
         super().save(*args, **kwargs)
+        # print(dir(self))
+        student_group, _ = Group.objects.get_or_create(name="Student")
+        self.groups.add(student_group)
+
+
+
+
+
+from django.utils import timezone
+class StudentAttendance(models.Model):
+    STATUS_CHOICES = [
+        ('Present', 'Present'),
+        ('Late', 'Late'),
+    ]
+
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, limit_choices_to={'groups__name': "Student"})
+    date = models.DateField(default=timezone.now)
+    check_in = models.TimeField(null=True, blank=True)
+    check_out = models.TimeField(null=True, blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Present')
+
+    def total_hours(self):
+        """Calculate total hours spent in school if check-in and check-out are available."""
+        if self.check_in and self.check_out:
+            delta = timezone.datetime.combine(self.date, self.check_out) - timezone.datetime.combine(self.date, self.check_in)
+            return delta.total_seconds() / 3600  # Convert to hours
+        return 0
+
+    def __str__(self):
+        return f"{self.student.username} - {self.date} - {self.status}"
+
+

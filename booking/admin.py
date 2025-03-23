@@ -24,8 +24,8 @@ from django.http import HttpResponse
 logger = logging.getLogger(__name__)
 
 from utils.relatedToDate import format_time
-admin_site.register(Group)
-admin_site.register(CustomUser,CustomUserAdmin)
+# admin_site.register(Group)
+# admin_site.register(CustomUser,CustomUserAdmin)
 
 class LocationAdmin(admin.ModelAdmin):
 

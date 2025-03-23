@@ -8,6 +8,7 @@ from booking.forms.Library_form import LibraryForm
 from booking.forms.Seat_from import SeatForm
 from booking.forms.plan_form import MonthlyPlanForm
 from booking.forms.seat_allotement_form import BookingForm
+from myLibrary.decorators import role_required
 
 from .models import MonthlyPlan, Seat, Booking,Location
 from django.contrib import messages
@@ -141,12 +142,14 @@ def get_mothlyplans_by_user(request):
 
 # lib-----------------------------start
 @login_required    
+@role_required("Vendor", "Vendor Staff")
 def get_lib(request):
     libraries = Location.objects.all().filter(created_by=request.user)
     print(libraries)
-    return render(request,'customadmin/library.html',{"data":libraries})
+    return render(request,'vender/library.html',{"data":libraries})
 
-@login_required    
+@login_required   
+@role_required("Vendor") 
 def create_lib(request):
     if request.method == "POST":
         form = LibraryForm(request.POST)
@@ -159,9 +162,10 @@ def create_lib(request):
     else:
         form = LibraryForm()
     
-    return render(request, "customadmin/library_form.html", {"form": form})
+    return render(request, "vender/library_form.html", {"form": form})
 
-@login_required    
+@login_required 
+@role_required("Vendor", "Vendor Staff")
 def add_seat(request):
     if request.method == "POST":
         form = SeatForm(request.POST)
@@ -173,23 +177,26 @@ def add_seat(request):
     else:
         form = SeatForm()
     
-    return render(request, "customadmin/seat_form.html", {"form": form})
+    return render(request, "vender/seat_form.html", {"form": form})
 # lib-----------------------------end
 
 @login_required
+@role_required("Vendor", "Vendor Staff")
 def get_seat(request):
     seat = Seat.objects.all().filter(created_by=request.user).order_by('seat_no')
     # print(libraries)
-    return render(request,'customadmin/seats.html',{"data":seat})
+    return render(request,'vender/seats.html',{"data":seat})
 @login_required
+@role_required("Vendor", "Vendor Staff")
 def get_plan(request):
-    plan = MonthlyPlan.objects.all()
+    plan = MonthlyPlan.objects.all().filter(created_by=request.user)
     # print(libraries)
-    return render(request,'customadmin/plans.html',{"data":plan})
+    return render(request,'vender/plans.html',{"data":plan})
 
 # from django.shortcuts import render, redirect
 # from .forms import MonthlyPlanForm
 @login_required
+@role_required("Vendor", "Vendor Staff")
 def create_plan(request):
     if request.method == "POST":
         form = MonthlyPlanForm(request.POST)
@@ -201,14 +208,16 @@ def create_plan(request):
     else:
         form = MonthlyPlanForm()
 
-    return render(request, "customadmin/plan_form.html", {"form": form})
+    return render(request, "vender/plan_form.html", {"form": form})
 @login_required
+@role_required("Vendor", "Vendor Staff")
 def get_booking(request):
     alllotment = Booking.objects.all().filter(created_by=request.user)
     # print(libraries)
-    return render(request,'customadmin/seat_allotement.html',{"data":alllotment})
+    return render(request,'vender/seat_allotement.html',{"data":alllotment})
 
 @login_required
+@role_required("Vendor", "Vendor Staff")
 def seat_allotment(request):
     if request.method == "POST":
         form = BookingForm(request.POST, request=request)
@@ -219,4 +228,4 @@ def seat_allotment(request):
             return redirect('booking')  # Redirect to the list page
     else:
         form = BookingForm(None, request=request)
-    return render(request, "customadmin/seat_allotement_form.html", {"form": form})
+    return render(request, "vender/seat_allotement_form.html", {"form": form})

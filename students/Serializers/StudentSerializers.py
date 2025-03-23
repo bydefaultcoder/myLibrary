@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Student
+from ..models import Student
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
 class StudentRegistrationSerializer(serializers.ModelSerializer):
@@ -16,7 +16,8 @@ class StudentRegistrationSerializer(serializers.ModelSerializer):
             "date_of_birth",
             "password",
             "address",
-            "adhar_no",]
+            "adhar_no",
+            ]
 
     def create(self, validated_data):
 

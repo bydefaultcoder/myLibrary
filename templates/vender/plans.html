@@ -1,8 +1,8 @@
-{% extends "customadmin/index.html" %}
+{% extends "vender/index.html" %}
 {% load static %}
 
 {% block navcontent %}
-{% include 'customadmin/sidebar.html' with active='booking' %} 
+{% include 'vender/sidebar.html' with active='plan' %} 
 {% endblock navcontent %}
 {% block content %}
 
@@ -15,7 +15,7 @@
             </div>
 
             <div class="select-menu">
-                <a title="create new Library" href="{% url 'seat_allotment' %}"> <i class="uil uil-edit"></i> </a> <!-- Stylish Create Button -->
+                <a title="create new Library" href="{% url 'create_plan' %}"> <i class="uil uil-edit"></i> </a> <!-- Stylish Create Button -->
                 <div class="select-items select-items1">
                     <select name="" id="">
                         <option value="">select</option>
@@ -34,29 +34,23 @@
     </div>
 </div>
 {% comment %} <div class="dash-content other-content activity-container "> {% endcomment %}
-    <div class="activity-container" style="grid-template-columns: .5fr .8fr 1fr 1.4fr 1fr 1fr 1fr 1.3fr;">
+    <div class="activity-container" style="grid-template-columns: 1fr 1fr 1fr 2fr 1fr;">
         <!-- Header Row ('getPlanningFor','getHours', 'getPrize',  'status') -->
         <div class="activity-header">
-            <span class="data-list">Allotment ID</span>
-            <span class="data-list">Student Name</span>
-            <span class="data-list">Lib &#38; seat</span>
-            <span class="data-list">Alloted At</span>
-            <span class="data-list">Active Timme</span>
-            <span class="data-list">Joined At</span>
-            <span class="data-list">Expired At</span>
-            <span class="data-list">Action</span>
+            <span class="data-list">Plan type</span>
+            <span class="data-list">Hours</span>
+            <span class="data-list">Price</span>
+            <span class="data-list">Status</span>
+            <span class="data-list">Actions</span>
         </div>
     
-        <!-- Data Rows 'Studnt_Name', 'booking_id','Seat_no_w_lib', 'booking_time','active_hour','joining_date_wr','valid_till' -->
+        <!-- Data Rows -->
         {% for i in data %}
         <div class="activity-data">
-            <span class="data-list">{{ i.pk }}</span>
-            <span class="data-list">{{ i.Studnt_Name }}</span>
-            <span class="data-list">{{ i.Seat_no_w_lib }}</span>
-            <span class="data-list">{{ i.booking_time }}</span>
-            <span class="data-list">{{ i.active_hour }}</span>
-            <span class="data-list">{{ i.joining_date_wr }}</span>
-            <span class="data-list">{{ i.valid_till }}</span>
+            <span class="data-list">{{ i.getPlanningFor }}</span>
+            <span class="data-list">{{ i.getHours }}</span>
+            <span class="data-list">{{ i.getPrize }}</span>
+            <span class="data-list">{{ i.status }}</span>
             <span class="data-list">
                 <a class="edit" href="#"><i class="uil uil-edit"></i> Edit</a>
                 <a class="edit" href="#"><i class="uil uil-trash"></i> Delete</a>
@@ -64,5 +58,4 @@
         </div>
         {% endfor %}
     </div>
-
 {% endblock content %}

@@ -18,6 +18,8 @@ from django.http import HttpResponse
 from django.contrib.auth.admin import UserAdmin
 import json
 
+from students.models import StudentAttendance
+
 from .studentCreationForm import StudentCreationForm
 logger = logging.getLogger(__name__)
 # Register your models here.
@@ -152,3 +154,4 @@ class ImagePreviewWidget(forms.ClearableFileInput):
 # @admin.register(Student)
 
 admin_site.register(Student,StudentAdmin)
+admin_site.register(StudentAttendance)
